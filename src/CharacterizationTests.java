@@ -22,6 +22,7 @@ public class CharacterizationTests {
         else fail("called color");
         if (!CardRules.isLegal("B3", "R9", "")) passed++;
         else fail("illegal mismatch");
+
         if (Main.parseCardIndex("0", 3) == 0) passed++;
         else fail("parse valid index");
         if (Main.parseCardIndex("2", 3) == 2) passed++;
@@ -30,6 +31,8 @@ public class CharacterizationTests {
         else fail("parse index out of range");
         if (Main.parseCardIndex("R5", 3) == -1) passed++;
         else fail("parse non-index input");
+        if (Main.parseCardIndex("draw", 3) == -1) passed++;
+        else fail("draw input is not a card index");
 
         ArrayList<String> h = new ArrayList<String>();
         h.add("B3");
@@ -46,6 +49,17 @@ public class CharacterizationTests {
         h2.add("R3");
         if (BotStrategy.chooseColor(h2).equals("B")) passed++;
         else fail("bot color");
+
+        ArrayList<String> h3 = new ArrayList<String>();
+        h3.add("B3");
+        Main.state.upCard = "R9";
+        Main.state.calledColor = "";
+        if (BotStrategy.chooseCard(h3, Main.state.upCard, Main.state.calledColor) == -1) passed++;
+        else fail("bot has no legal card before drawing");
+
+        String drawnLegalCard = "R4";
+        if (CardRules.isLegal(drawnLegalCard, Main.state.upCard, Main.state.calledColor)) passed++;
+        else fail("drawn bot card can be legal for auto-play");
 
         if (CardRules.isLegal("BS", "RS", "")) passed++;
         else fail("same action skip");
@@ -113,6 +127,17 @@ public class CharacterizationTests {
         ActionEffects.apply("W4", Main.state, Main::draw, Main.quiet);
         if (Main.state.hands.get(1).size() == 4 && Main.state.currentPlayer == 2) passed++;
         else fail("wild draw four gives cards and skips");
+
+        Main.setupPlayers(3, false);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = 1;
+        Main.state.deck.clear();
+        Main.state.deck.add("R8");
+        int beforePenaltySize = Main.state.hands.get(0).size();
+        Main.state.hands.get(0).add(Main.draw());
+        Main.state.nextPlayer();
+        if (Main.state.hands.get(0).size() == beforePenaltySize + 1 && Main.state.currentPlayer == 1) passed++;
+        else fail("invalid index penalty draws card and loses turn");
 
         Main.setupPlayers(3, false);
         Main.state.hands.get(0).clear();
