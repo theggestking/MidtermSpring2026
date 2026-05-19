@@ -204,14 +204,7 @@ public class Main {
                 }
 
                 if (hand.size() == 0) {
-                    int points = 0;
-                    for (int i = 0; i < hands.size(); i++) {
-                        if (i != currentPlayer) {
-                            for (int j = 0; j < hands.get(i).size(); j++) {
-                                points += points(hands.get(i).get(j));
-                            }
-                        }
-                    }
+                    int points = scoreForWinner(currentPlayer);
                     scores[currentPlayer] += points;
                     if (!quiet) {
                         System.out.println(name + " wins and scores " + points);
@@ -434,6 +427,18 @@ public class Main {
             return Integer.parseInt(card.substring(1));
         }
         return -1;
+    }
+
+    static int scoreForWinner(int winner) {
+        int total = 0;
+        for (int i = 0; i < hands.size(); i++) {
+            if (i != winner) {
+                for (int j = 0; j < hands.get(i).size(); j++) {
+                    total += points(hands.get(i).get(j));
+                }
+            }
+        }
+        return total;
     }
 
     static int points(String card) {
