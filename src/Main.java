@@ -416,10 +416,11 @@ public class Main {
     }
 
     static void applyCardEffect(String card) {
-        if (rank(card).equals("SKIP")) {
+        String cardRank = rank(card);
+        if (cardRank.equals("SKIP")) {
             next();
             next();
-        } else if (rank(card).equals("REVERSE")) {
+        } else if (cardRank.equals("REVERSE")) {
             direction = direction * -1;
             if (playerNames.size() == 2) {
                 next();
@@ -427,7 +428,7 @@ public class Main {
             } else {
                 next();
             }
-        } else if (rank(card).equals("DRAW_TWO")) {
+        } else if (cardRank.equals("DRAW_TWO")) {
             next();
             hands.get(currentPlayer).add(draw());
             hands.get(currentPlayer).add(draw());
@@ -435,7 +436,7 @@ public class Main {
                 System.out.println(playerNames.get(currentPlayer) + " draws two.");
             }
             next();
-        } else if (rank(card).equals("WILD_DRAW_FOUR")) {
+        } else if (cardRank.equals("WILD_DRAW_FOUR")) {
             next();
             for (int i = 0; i < 4; i++) {
                 hands.get(currentPlayer).add(draw());
