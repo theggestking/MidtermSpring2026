@@ -73,24 +73,7 @@ public class Main {
     }
 
     static void playGame() {
-        buildDeck();
-        state.discard.clear();
-        for (int i = 0; i < state.hands.size(); i++) {
-            state.hands.get(i).clear();
-        }
-        for (int i = 0; i < state.playerNames.size(); i++) {
-            for (int j = 0; j < 7; j++) {
-                state.hands.get(i).add(draw());
-            }
-        }
-        state.upCard = draw();
-        while (state.upCard.startsWith("W")) {
-            state.discard.add(state.upCard);
-            state.upCard = draw();
-        }
-        state.calledColor = "";
-        state.direction = 1;
-        state.currentPlayer = random.nextInt(state.playerNames.size());
+        startNewGame();
 
         int guard = 0;
         while (guard < 3000) {
@@ -191,6 +174,27 @@ public class Main {
         if (!quiet) {
             System.out.println("Game stopped at safety limit.");
         }
+    }
+
+    static void startNewGame() {
+        buildDeck();
+        state.discard.clear();
+        for (int i = 0; i < state.hands.size(); i++) {
+            state.hands.get(i).clear();
+        }
+        for (int i = 0; i < state.playerNames.size(); i++) {
+            for (int j = 0; j < 7; j++) {
+                state.hands.get(i).add(draw());
+            }
+        }
+        state.upCard = draw();
+        while (state.upCard.startsWith("W")) {
+            state.discard.add(state.upCard);
+            state.upCard = draw();
+        }
+        state.calledColor = "";
+        state.direction = 1;
+        state.currentPlayer = random.nextInt(state.playerNames.size());
     }
 
     static void buildDeck() {
