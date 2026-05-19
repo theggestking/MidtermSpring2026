@@ -83,26 +83,7 @@ public class Main {
     }
 
     static void playGame() {
-        deck.clear();
-        String[] colors = {"R", "Y", "G", "B"};
-        for (int c = 0; c < colors.length; c++) {
-            deck.add(colors[c] + "0");
-            for (int n = 1; n <= 9; n++) {
-                deck.add(colors[c] + n);
-                deck.add(colors[c] + n);
-            }
-            deck.add(colors[c] + "S");
-            deck.add(colors[c] + "S");
-            deck.add(colors[c] + "R");
-            deck.add(colors[c] + "R");
-            deck.add(colors[c] + "+2");
-            deck.add(colors[c] + "+2");
-        }
-        for (int i = 0; i < 4; i++) {
-            deck.add("W");
-            deck.add("W4");
-        }
-        Collections.shuffle(deck, random);
+        buildDeck();
         discard.clear();
         for (int i = 0; i < hands.size(); i++) {
             hands.get(i).clear();
@@ -220,6 +201,29 @@ public class Main {
         if (!quiet) {
             System.out.println("Game stopped at safety limit.");
         }
+    }
+
+    static void buildDeck() {
+        deck.clear();
+        String[] colors = {"R", "Y", "G", "B"};
+        for (int c = 0; c < colors.length; c++) {
+            deck.add(colors[c] + "0");
+            for (int n = 1; n <= 9; n++) {
+                deck.add(colors[c] + n);
+                deck.add(colors[c] + n);
+            }
+            deck.add(colors[c] + "S");
+            deck.add(colors[c] + "S");
+            deck.add(colors[c] + "R");
+            deck.add(colors[c] + "R");
+            deck.add(colors[c] + "+2");
+            deck.add(colors[c] + "+2");
+        }
+        for (int i = 0; i < 4; i++) {
+            deck.add("W");
+            deck.add("W4");
+        }
+        Collections.shuffle(deck, random);
     }
 
     static String draw() {
