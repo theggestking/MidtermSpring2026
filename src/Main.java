@@ -116,7 +116,7 @@ public class Main {
             if (humanPlayers.get(currentPlayer).booleanValue()) {
                 chosen = askHuman(hand);
             } else {
-                chosen = chooseBotCard(hand);
+                chosen = BotStrategy.chooseCard(hand, upCard, calledColor);
             }
 
             if (chosen == -1) {
@@ -172,7 +172,7 @@ public class Main {
                     if (humanPlayers.get(currentPlayer).booleanValue()) {
                         calledColor = askColor();
                     } else {
-                        calledColor = chooseBotColor(hand);
+                        calledColor = BotStrategy.chooseColor(hand);
                     }
                     if (!quiet) {
                         System.out.println(name + " calls " + calledColor);
@@ -237,40 +237,6 @@ public class Main {
         return deck.remove(0);
     }
 
-    static int findPlayableCardByRank(ArrayList<String> hand, String preferredRank) {
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            if (CardRules.rank(card).equals(preferredRank) && CardRules.isLegal(card, upCard, calledColor)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    static int chooseBotCard(ArrayList<String> hand) {
-        int drawTwo = findPlayableCardByRank(hand, "DRAW_TWO");
-        if (drawTwo != -1) {
-            return drawTwo;
-        }
-
-        int skip = findPlayableCardByRank(hand, "SKIP");
-        if (skip != -1) {
-            return skip;
-        }
-
-        int number = findPlayableCardByRank(hand, "NUMBER");
-        if (number != -1) {
-            return number;
-        }
-
-        for (int i = 0; i < hand.size(); i++) {
-            if (hand.get(i).startsWith("W")) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     static int parseCardIndex(String input, int handSize) {
         try {
             int index = Integer.parseInt(input);
@@ -322,34 +288,6 @@ public class Main {
                 return "B";
             }
             System.out.println("Bad color.");
-        }
-    }
-
-    static String chooseBotColor(ArrayList<String> hand) {
-        int r = 0;
-        int y = 0;
-        int g = 0;
-        int b = 0;
-        for (int i = 0; i < hand.size(); i++) {
-            String c = CardRules.color(hand.get(i));
-            if (c.equals("R")) {
-                r++;
-            } else if (c.equals("Y")) {
-                y++;
-            } else if (c.equals("G")) {
-                g++;
-            } else if (c.equals("B")) {
-                b++;
-            }
-        }
-        if (r >= y && r >= g && r >= b) {
-            return "R";
-        } else if (y >= r && y >= g && y >= b) {
-            return "Y";
-        } else if (g >= r && g >= y && g >= b) {
-            return "G";
-        } else {
-            return "B";
         }
     }
 
@@ -453,14 +391,14 @@ public class Main {
         h.add("W");
         upCard = "R9";
         calledColor = "";
-        if (chooseBotCard(h) == 1) passed++;
+        if (BotStrategy.chooseCard(h, upCard, calledColor) == 1) passed++;
         else fail("bot normal before wild");
 
         ArrayList<String> h2 = new ArrayList<String>();
         h2.add("B1");
         h2.add("B2");
         h2.add("R3");
-        if (chooseBotColor(h2).equals("B")) passed++;
+        if (BotStrategy.chooseColor(h2).equals("B")) passed++;
         else fail("bot color");
 
         if (CardRules.isLegal("BS", "RS", "")) passed++;
