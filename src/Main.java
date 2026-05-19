@@ -234,28 +234,32 @@ public class Main {
         return deck.remove(0);
     }
 
+    static int findPlayableCardByRank(ArrayList<String> hand, String preferredRank) {
+        for (int i = 0; i < hand.size(); i++) {
+            String card = hand.get(i);
+            if (rank(card).equals(preferredRank) && isLegal(card, upCard, calledColor)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     static int chooseBotCard(ArrayList<String> hand) {
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            boolean ok = isLegal(card, upCard, calledColor);
-            if (rank(card).equals("DRAW_TWO") && ok) {
-                return i;
-            }
+        int drawTwo = findPlayableCardByRank(hand, "DRAW_TWO");
+        if (drawTwo != -1) {
+            return drawTwo;
         }
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            boolean ok = isLegal(card, upCard, calledColor);
-            if (rank(card).equals("SKIP") && ok) {
-                return i;
-            }
+
+        int skip = findPlayableCardByRank(hand, "SKIP");
+        if (skip != -1) {
+            return skip;
         }
-        for (int i = 0; i < hand.size(); i++) {
-            String card = hand.get(i);
-            boolean ok = isLegal(card, upCard, calledColor);
-            if (rank(card).equals("NUMBER") && ok) {
-                return i;
-            }
+
+        int number = findPlayableCardByRank(hand, "NUMBER");
+        if (number != -1) {
+            return number;
         }
+
         for (int i = 0; i < hand.size(); i++) {
             if (hand.get(i).startsWith("W")) {
                 return i;
