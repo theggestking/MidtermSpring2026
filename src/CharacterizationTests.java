@@ -33,6 +33,12 @@ public class CharacterizationTests {
         else fail("parse non-index input");
         if (Main.parseCardIndex("draw", 3) == -1) passed++;
         else fail("draw input is not a card index");
+        if (Main.parseCalledColor("r").equals("R")) passed++;
+        else fail("parse lowercase called color");
+        if (Main.parseCalledColor("B").equals("B")) passed++;
+        else fail("parse valid called color");
+        if (Main.parseCalledColor("purple").equals("")) passed++;
+        else fail("parse invalid called color");
 
         ArrayList<String> h = new ArrayList<String>();
         h.add("B3");
