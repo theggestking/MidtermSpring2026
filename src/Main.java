@@ -184,7 +184,7 @@ public class Main {
                 }
 
                 if (hand.size() == 0) {
-                    int points = scoreForWinner(currentPlayer);
+                    int points = ScoreCalculator.scoreForWinner(hands, currentPlayer);
                     scores[currentPlayer] += points;
                     if (!quiet) {
                         System.out.println(name + " wins and scores " + points);
@@ -326,18 +326,6 @@ public class Main {
         }
     }
 
-    static int scoreForWinner(int winner) {
-        int total = 0;
-        for (int i = 0; i < hands.size(); i++) {
-            if (i != winner) {
-                for (int j = 0; j < hands.get(i).size(); j++) {
-                    total += CardRules.points(hands.get(i).get(j));
-                }
-            }
-        }
-        return total;
-    }
-
     static void next() {
         currentPlayer += direction;
         if (currentPlayer >= playerNames.size()) {
@@ -474,7 +462,7 @@ public class Main {
         hands.get(1).add("R5");
         hands.get(1).add("GS");
         hands.get(2).add("W");
-        if (scoreForWinner(0) == 75) passed++;
+        if (ScoreCalculator.scoreForWinner(hands, 0) == 75) passed++;
         else fail("winner score totals other hands");
 
         System.out.println("Passed " + passed + " characterization checks.");
