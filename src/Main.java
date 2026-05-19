@@ -526,6 +526,19 @@ public class Main {
         h2.add("R3");
         if (chooseBotColor(h2).equals("B")) passed++; else fail("bot color");
 
+        if (isLegal("BS", "RS", "")) passed++; else fail("same action skip");
+        if (isLegal("B+2", "R+2", "")) passed++; else fail("same action draw two");
+        if (isLegal("BR", "RR", "")) passed++; else fail("same action reverse");
+        if (isLegal("W", "R9", "")) passed++; else fail("wild legal");
+        if (isLegal("W4", "R9", "")) passed++; else fail("wild draw four legal");
+        if (points("R7") == 7) passed++; else fail("number points");
+        if (points("RS") == 20) passed++; else fail("skip points");
+        if (points("R+2") == 20) passed++; else fail("draw two points");
+        if (points("W") == 50) passed++; else fail("wild points");
+        deck.clear();
+        discard.clear();
+        if (draw().equals("W")) passed++; else fail("empty deck fallback");
+
         System.out.println("Passed " + passed + " characterization checks.");
     }
 
