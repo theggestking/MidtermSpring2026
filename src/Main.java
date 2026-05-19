@@ -268,6 +268,17 @@ public class Main {
         return -1;
     }
 
+    static int parseCardIndex(String input, int handSize) {
+        try {
+            int index = Integer.parseInt(input);
+            if (index >= 0 && index < handSize) {
+                return index;
+            }
+        } catch (Exception ignored) {
+        }
+        return -1;
+    }
+
     static int askHuman(ArrayList<String> hand) {
         while (true) {
             System.out.print("Choose card index/code or draw: ");
@@ -275,12 +286,9 @@ public class Main {
             if (input.equals("DRAW")) {
                 return -1;
             }
-            try {
-                int index = Integer.parseInt(input);
-                if (index >= 0 && index < hand.size()) {
-                    return index;
-                }
-            } catch (Exception ignored) {
+            int index = parseCardIndex(input, hand.size());
+            if (index != -1) {
+                return index;
             }
             for (int i = 0; i < hand.size(); i++) {
                 if (hand.get(i).equals(input)) {
@@ -501,6 +509,14 @@ public class Main {
         else fail("called color");
         if (!isLegal("B3", "R9", "")) passed++;
         else fail("illegal mismatch");
+        if (parseCardIndex("0", 3) == 0) passed++;
+        else fail("parse valid index");
+        if (parseCardIndex("2", 3) == 2) passed++;
+        else fail("parse last valid index");
+        if (parseCardIndex("3", 3) == -1) passed++;
+        else fail("parse index out of range");
+        if (parseCardIndex("R5", 3) == -1) passed++;
+        else fail("parse non-index input");
 
         ArrayList<String> h = new ArrayList<String>();
         h.add("B3");
