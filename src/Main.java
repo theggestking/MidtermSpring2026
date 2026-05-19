@@ -27,7 +27,7 @@ public class Main {
             } else if (args[i].equals("--seed") && i + 1 < args.length) {
                 seed = Long.parseLong(args[++i]);
             } else if (args[i].equals("--self-test")) {
-                selfTest();
+                CharacterizationTests.run();
                 return;
             } else if (args[i].equals("--help")) {
                 System.out.println("Usage: scripts/run.sh [--bots N] [--games N] [--human] [--quiet] [--seed N]");
@@ -295,130 +295,5 @@ public class Main {
             }
         }
         return out;
-    }
-
-    static void selfTest() {
-        int passed = 0;
-        quiet = true;
-        if (CardRules.color("R5").equals("R")) passed++;
-        else fail("color R5");
-        if (CardRules.rank("G+2").equals("DRAW_TWO")) passed++;
-        else fail("rank +2");
-        if (CardRules.points("W4") == 50) passed++;
-        else fail("wild points");
-        if (CardRules.isLegal("R2", "R9", "")) passed++;
-        else fail("same color");
-        if (CardRules.isLegal("G9", "R9", "")) passed++;
-        else fail("same number");
-        if (CardRules.isLegal("B3", "W", "B")) passed++;
-        else fail("called color");
-        if (!CardRules.isLegal("B3", "R9", "")) passed++;
-        else fail("illegal mismatch");
-        if (parseCardIndex("0", 3) == 0) passed++;
-        else fail("parse valid index");
-        if (parseCardIndex("2", 3) == 2) passed++;
-        else fail("parse last valid index");
-        if (parseCardIndex("3", 3) == -1) passed++;
-        else fail("parse index out of range");
-        if (parseCardIndex("R5", 3) == -1) passed++;
-        else fail("parse non-index input");
-
-        ArrayList<String> h = new ArrayList<String>();
-        h.add("B3");
-        h.add("R4");
-        h.add("W");
-        state.upCard = "R9";
-        state.calledColor = "";
-        if (BotStrategy.chooseCard(h, state.upCard, state.calledColor) == 1) passed++;
-        else fail("bot normal before wild");
-
-        ArrayList<String> h2 = new ArrayList<String>();
-        h2.add("B1");
-        h2.add("B2");
-        h2.add("R3");
-        if (BotStrategy.chooseColor(h2).equals("B")) passed++;
-        else fail("bot color");
-
-        if (CardRules.isLegal("BS", "RS", "")) passed++;
-        else fail("same action skip");
-        if (CardRules.isLegal("B+2", "R+2", "")) passed++;
-        else fail("same action draw two");
-        if (CardRules.isLegal("BR", "RR", "")) passed++;
-        else fail("same action reverse");
-        if (CardRules.isLegal("W", "R9", "")) passed++;
-        else fail("wild legal");
-        if (CardRules.isLegal("W4", "R9", "")) passed++;
-        else fail("wild draw four legal");
-        if (CardRules.points("R7") == 7) passed++;
-        else fail("number points");
-        if (CardRules.points("RS") == 20) passed++;
-        else fail("skip points");
-        if (CardRules.points("R+2") == 20) passed++;
-        else fail("draw two points");
-        if (CardRules.points("W") == 50) passed++;
-        else fail("wild points");
-        state.deck.clear();
-        state.discard.clear();
-        if (draw().equals("W")) passed++;
-        else fail("empty deck fallback");
-
-        setupPlayers(3, false);
-        state.currentPlayer = 0;
-        state.direction = 1;
-        ActionEffects.apply("RS", state, Main::draw, quiet);
-        if (state.currentPlayer == 2) passed++;
-        else fail("skip advances past next player");
-
-        setupPlayers(3, false);
-        state.currentPlayer = 0;
-        state.direction = 1;
-        ActionEffects.apply("RR", state, Main::draw, quiet);
-        if (state.direction == -1 && state.currentPlayer == 2) passed++;
-        else fail("reverse changes direction");
-
-        setupPlayers(1, true);
-        state.currentPlayer = 0;
-        state.direction = 1;
-        ActionEffects.apply("RR", state, Main::draw, quiet);
-        if (state.currentPlayer == 0) passed++;
-        else fail("two player reverse acts like skip");
-
-        setupPlayers(3, false);
-        state.currentPlayer = 0;
-        state.direction = 1;
-        state.deck.clear();
-        state.deck.add("R1");
-        state.deck.add("R2");
-        ActionEffects.apply("R+2", state, Main::draw, quiet);
-        if (state.hands.get(1).size() == 2 && state.currentPlayer == 2) passed++;
-        else fail("draw two gives cards and skips");
-
-        setupPlayers(3, false);
-        state.currentPlayer = 0;
-        state.direction = 1;
-        state.deck.clear();
-        state.deck.add("R1");
-        state.deck.add("R2");
-        state.deck.add("R3");
-        state.deck.add("R4");
-        ActionEffects.apply("W4", state, Main::draw, quiet);
-        if (state.hands.get(1).size() == 4 && state.currentPlayer == 2) passed++;
-        else fail("wild draw four gives cards and skips");
-
-        setupPlayers(3, false);
-        state.hands.get(0).clear();
-        state.hands.get(1).clear();
-        state.hands.get(2).clear();
-        state.hands.get(1).add("R5");
-        state.hands.get(1).add("GS");
-        state.hands.get(2).add("W");
-        if (ScoreCalculator.scoreForWinner(state.hands, 0) == 75) passed++;
-        else fail("winner score totals other hands");
-
-        System.out.println("Passed " + passed + " characterization checks.");
-    }
-
-    static void fail(String name) {
-        throw new RuntimeException("Failed: " + name);
     }
 }
