@@ -482,13 +482,21 @@ public class Main {
 
     static void selfTest() {
         int passed = 0;
-        if (color("R5").equals("R")) passed++; else fail("color R5");
-        if (rank("G+2").equals("DRAW_TWO")) passed++; else fail("rank +2");
-        if (points("W4") == 50) passed++; else fail("wild points");
-        if (isLegal("R2", "R9", "")) passed++; else fail("same color");
-        if (isLegal("G9", "R9", "")) passed++; else fail("same number");
-        if (isLegal("B3", "W", "B")) passed++; else fail("called color");
-        if (!isLegal("B3", "R9", "")) passed++; else fail("illegal mismatch");
+        quiet = true;
+        if (color("R5").equals("R")) passed++;
+        else fail("color R5");
+        if (rank("G+2").equals("DRAW_TWO")) passed++;
+        else fail("rank +2");
+        if (points("W4") == 50) passed++;
+        else fail("wild points");
+        if (isLegal("R2", "R9", "")) passed++;
+        else fail("same color");
+        if (isLegal("G9", "R9", "")) passed++;
+        else fail("same number");
+        if (isLegal("B3", "W", "B")) passed++;
+        else fail("called color");
+        if (!isLegal("B3", "R9", "")) passed++;
+        else fail("illegal mismatch");
 
         ArrayList<String> h = new ArrayList<String>();
         h.add("B3");
@@ -496,26 +504,91 @@ public class Main {
         h.add("W");
         upCard = "R9";
         calledColor = "";
-        if (chooseBotCard(h) == 1) passed++; else fail("bot normal before wild");
+        if (chooseBotCard(h) == 1) passed++;
+        else fail("bot normal before wild");
 
         ArrayList<String> h2 = new ArrayList<String>();
         h2.add("B1");
         h2.add("B2");
         h2.add("R3");
-        if (chooseBotColor(h2).equals("B")) passed++; else fail("bot color");
+        if (chooseBotColor(h2).equals("B")) passed++;
+        else fail("bot color");
 
-        if (isLegal("BS", "RS", "")) passed++; else fail("same action skip");
-        if (isLegal("B+2", "R+2", "")) passed++; else fail("same action draw two");
-        if (isLegal("BR", "RR", "")) passed++; else fail("same action reverse");
-        if (isLegal("W", "R9", "")) passed++; else fail("wild legal");
-        if (isLegal("W4", "R9", "")) passed++; else fail("wild draw four legal");
-        if (points("R7") == 7) passed++; else fail("number points");
-        if (points("RS") == 20) passed++; else fail("skip points");
-        if (points("R+2") == 20) passed++; else fail("draw two points");
-        if (points("W") == 50) passed++; else fail("wild points");
+        if (isLegal("BS", "RS", "")) passed++;
+        else fail("same action skip");
+        if (isLegal("B+2", "R+2", "")) passed++;
+        else fail("same action draw two");
+        if (isLegal("BR", "RR", "")) passed++;
+        else fail("same action reverse");
+        if (isLegal("W", "R9", "")) passed++;
+        else fail("wild legal");
+        if (isLegal("W4", "R9", "")) passed++;
+        else fail("wild draw four legal");
+        if (points("R7") == 7) passed++;
+        else fail("number points");
+        if (points("RS") == 20) passed++;
+        else fail("skip points");
+        if (points("R+2") == 20) passed++;
+        else fail("draw two points");
+        if (points("W") == 50) passed++;
+        else fail("wild points");
         deck.clear();
         discard.clear();
-        if (draw().equals("W")) passed++; else fail("empty deck fallback");
+        if (draw().equals("W")) passed++;
+        else fail("empty deck fallback");
+
+        setupPlayers(3, false);
+        currentPlayer = 0;
+        direction = 1;
+        applyCardEffect("RS");
+        if (currentPlayer == 2) passed++;
+        else fail("skip advances past next player");
+
+        setupPlayers(3, false);
+        currentPlayer = 0;
+        direction = 1;
+        applyCardEffect("RR");
+        if (direction == -1 && currentPlayer == 2) passed++;
+        else fail("reverse changes direction");
+
+        setupPlayers(1, true);
+        currentPlayer = 0;
+        direction = 1;
+        applyCardEffect("RR");
+        if (currentPlayer == 0) passed++;
+        else fail("two player reverse acts like skip");
+
+        setupPlayers(3, false);
+        currentPlayer = 0;
+        direction = 1;
+        deck.clear();
+        deck.add("R1");
+        deck.add("R2");
+        applyCardEffect("R+2");
+        if (hands.get(1).size() == 2 && currentPlayer == 2) passed++;
+        else fail("draw two gives cards and skips");
+
+        setupPlayers(3, false);
+        currentPlayer = 0;
+        direction = 1;
+        deck.clear();
+        deck.add("R1");
+        deck.add("R2");
+        deck.add("R3");
+        deck.add("R4");
+        applyCardEffect("W4");
+        if (hands.get(1).size() == 4 && currentPlayer == 2) passed++;
+        else fail("wild draw four gives cards and skips");
+
+        setupPlayers(3, false);
+        hands.get(0).clear();
+        hands.get(1).clear();
+        hands.get(2).clear();
+        hands.get(1).add("R5");
+        hands.get(1).add("GS");
+        hands.get(2).add("W");
+        if (scoreForWinner(0) == 75) passed++;
+        else fail("winner score totals other hands");
 
         System.out.println("Passed " + passed + " characterization checks.");
     }
