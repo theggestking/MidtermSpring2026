@@ -118,7 +118,7 @@ public class Main {
                         System.out.println(name + " selected an invalid index and draws a penalty card.");
                     }
                     hand.add(draw());
-                    next();
+                    state.nextPlayer();
                     continue;
                 }
 
@@ -130,7 +130,7 @@ public class Main {
                         System.out.println(name + " tried illegal card " + card + " and draws a penalty card.");
                     }
                     hand.add(draw());
-                    next();
+                    state.nextPlayer();
                     continue;
                 }
 
@@ -166,9 +166,9 @@ public class Main {
                     return;
                 }
 
-                applyCardEffect(card);
+                ActionEffects.apply(card, state, Main::draw, quiet);
             } else {
-                next();
+                state.nextPlayer();
             }
         }
         if (!quiet) {
@@ -286,51 +286,6 @@ public class Main {
         }
     }
 
-    static void applyCardEffect(String card) {
-        String cardRank = CardRules.rank(card);
-        if (cardRank.equals("SKIP")) {
-            next();
-            next();
-        } else if (cardRank.equals("REVERSE")) {
-            state.direction = state.direction * -1;
-            if (state.playerNames.size() == 2) {
-                next();
-                next();
-            } else {
-                next();
-            }
-        } else if (cardRank.equals("DRAW_TWO")) {
-            next();
-            state.hands.get(state.currentPlayer).add(draw());
-            state.hands.get(state.currentPlayer).add(draw());
-            if (!quiet) {
-                System.out.println(state.playerNames.get(state.currentPlayer) + " draws two.");
-            }
-            next();
-        } else if (cardRank.equals("WILD_DRAW_FOUR")) {
-            next();
-            for (int i = 0; i < 4; i++) {
-                state.hands.get(state.currentPlayer).add(draw());
-            }
-            if (!quiet) {
-                System.out.println(state.playerNames.get(state.currentPlayer) + " draws four.");
-            }
-            next();
-        } else {
-            next();
-        }
-    }
-
-    static void next() {
-        state.currentPlayer += state.direction;
-        if (state.currentPlayer >= state.playerNames.size()) {
-            state.currentPlayer = 0;
-        }
-        if (state.currentPlayer < 0) {
-            state.currentPlayer = state.playerNames.size() - 1;
-        }
-    }
-
     static String join(ArrayList<String> cards) {
         String out = "";
         for (int i = 0; i < cards.size(); i++) {
@@ -410,21 +365,21 @@ public class Main {
         setupPlayers(3, false);
         state.currentPlayer = 0;
         state.direction = 1;
-        applyCardEffect("RS");
+        ActionEffects.apply("RS", state, Main::draw, quiet);
         if (state.currentPlayer == 2) passed++;
         else fail("skip advances past next player");
 
         setupPlayers(3, false);
         state.currentPlayer = 0;
         state.direction = 1;
-        applyCardEffect("RR");
+        ActionEffects.apply("RR", state, Main::draw, quiet);
         if (state.direction == -1 && state.currentPlayer == 2) passed++;
         else fail("reverse changes direction");
 
         setupPlayers(1, true);
         state.currentPlayer = 0;
         state.direction = 1;
-        applyCardEffect("RR");
+        ActionEffects.apply("RR", state, Main::draw, quiet);
         if (state.currentPlayer == 0) passed++;
         else fail("two player reverse acts like skip");
 
@@ -434,7 +389,7 @@ public class Main {
         state.deck.clear();
         state.deck.add("R1");
         state.deck.add("R2");
-        applyCardEffect("R+2");
+        ActionEffects.apply("R+2", state, Main::draw, quiet);
         if (state.hands.get(1).size() == 2 && state.currentPlayer == 2) passed++;
         else fail("draw two gives cards and skips");
 
@@ -446,7 +401,7 @@ public class Main {
         state.deck.add("R2");
         state.deck.add("R3");
         state.deck.add("R4");
-        applyCardEffect("W4");
+        ActionEffects.apply("W4", state, Main::draw, quiet);
         if (state.hands.get(1).size() == 4 && state.currentPlayer == 2) passed++;
         else fail("wild draw four gives cards and skips");
 

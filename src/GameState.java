@@ -11,4 +11,14 @@ public class GameState {
     int direction = 1;
     String upCard = "";
     String calledColor = "";
+
+    void nextPlayer() {
+        currentPlayer += direction;
+        if (currentPlayer >= playerNames.size()) {
+            currentPlayer = 0;
+        }
+        if (currentPlayer < 0) {
+            currentPlayer = playerNames.size() - 1;
+        }
+    }
 }
