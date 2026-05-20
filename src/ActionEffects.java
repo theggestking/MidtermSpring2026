@@ -4,8 +4,8 @@ public class ActionEffects {
     private ActionEffects() {
     }
 
-    static String apply(String card, GameState state, Supplier<String> drawCard) {
-        String cardRank = CardRules.rank(card);
+    static String apply(Card card, GameState state, Supplier<Card> drawCard) {
+        String cardRank = card.rank();
 
         if (cardRank.equals("SKIP")) {
             return applySkip(state);
@@ -41,7 +41,7 @@ public class ActionEffects {
         return "";
     }
 
-    private static String applyDrawTwo(GameState state, Supplier<String> drawCard) {
+    private static String applyDrawTwo(GameState state, Supplier<Card> drawCard) {
         state.nextPlayer();
         state.hands.get(state.currentPlayer).add(drawCard.get());
         state.hands.get(state.currentPlayer).add(drawCard.get());
@@ -50,7 +50,7 @@ public class ActionEffects {
         return message;
     }
 
-    private static String applyWildDrawFour(GameState state, Supplier<String> drawCard) {
+    private static String applyWildDrawFour(GameState state, Supplier<Card> drawCard) {
         state.nextPlayer();
         for (int i = 0; i < 4; i++) {
             state.hands.get(state.currentPlayer).add(drawCard.get());

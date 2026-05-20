@@ -19,12 +19,12 @@ public class ConsoleView {
         }
     }
 
-    void showTurn(String upCard, String calledColor, String name, ArrayList<String> hand) {
+    void showTurn(String upCard, String calledColor, String name, ArrayList<Card> hand) {
         System.out.println("\nUp card: " + upCard + (calledColor.equals("") ? "" : " called " + calledColor));
         System.out.println(name + " hand: " + join(hand));
     }
 
-    int askHuman(ArrayList<String> hand, String upCard, String calledColor) {
+    int askHuman(ArrayList<Card> hand, String upCard, String calledColor) {
         while (true) {
             System.out.print("Choose card index/code or draw: ");
             String input = scanner.nextLine().trim().toUpperCase();
@@ -38,8 +38,8 @@ public class ConsoleView {
             }
 
             for (int i = 0; i < hand.size(); i++) {
-                if (hand.get(i).equals(input)) {
-                    if (CardRules.isLegal(hand.get(i), upCard, calledColor)) {
+                if (hand.get(i).code().equals(input)) {
+                    if (CardRules.isLegal(hand.get(i).code(), upCard, calledColor)) {
                         return i;
                     }
                     System.out.println("That card is not legal.");
@@ -103,10 +103,10 @@ public class ConsoleView {
         System.out.println("Game stopped at safety limit.");
     }
 
-    private String join(ArrayList<String> cards) {
+    private String join(ArrayList<Card> cards) {
         String out = "";
         for (int i = 0; i < cards.size(); i++) {
-            out += i + ":" + cards.get(i);
+            out += i + ":" + cards.get(i).code();
             if (i < cards.size() - 1) {
                 out += " ";
             }

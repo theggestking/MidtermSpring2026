@@ -49,24 +49,24 @@ public class CharacterizationTests {
         if (!Card.isValid("Q5")) passed++;
         else fail("invalid color rejected");
 
-        ArrayList<String> h = new ArrayList<String>();
-        h.add("B3");
-        h.add("R4");
-        h.add("W");
+        ArrayList<Card> h = new ArrayList<Card>();
+        h.add(Card.from("B3"));
+        h.add(Card.from("R4"));
+        h.add(Card.from("W"));
         Main.state.upCard = Card.from("R9");
         Main.state.calledColor = "";
         if (BotStrategy.chooseCard(h, Main.state.upCardCode(), Main.state.calledColor) == 1) passed++;
         else fail("bot normal before wild");
 
-        ArrayList<String> h2 = new ArrayList<String>();
-        h2.add("B1");
-        h2.add("B2");
-        h2.add("R3");
+        ArrayList<Card> h2 = new ArrayList<Card>();
+        h2.add(Card.from("B1"));
+        h2.add(Card.from("B2"));
+        h2.add(Card.from("R3"));
         if (BotStrategy.chooseColor(h2).equals("B")) passed++;
         else fail("bot color");
 
-        ArrayList<String> h3 = new ArrayList<String>();
-        h3.add("B3");
+        ArrayList<Card> h3 = new ArrayList<Card>();
+        h3.add(Card.from("B3"));
         Main.state.upCard = Card.from("R9");
         Main.state.calledColor = "";
         if (BotStrategy.chooseCard(h3, Main.state.upCardCode(), Main.state.calledColor) == -1) passed++;
@@ -103,21 +103,21 @@ public class CharacterizationTests {
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RS", Main.state, () -> Main.state.draw(Main.random).code());
+        ActionEffects.apply(Card.from("RS"), Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.currentPlayer == 2) passed++;
         else fail("skip advances past next player");
 
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RR", Main.state, () -> Main.state.draw(Main.random).code());
+        ActionEffects.apply(Card.from("RR"), Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.direction == -1 && Main.state.currentPlayer == 2) passed++;
         else fail("reverse changes direction");
 
         Main.setupPlayers(1, true);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RR", Main.state, () -> Main.state.draw(Main.random).code());
+        ActionEffects.apply(Card.from("RR"), Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.currentPlayer == 0) passed++;
         else fail("two player reverse acts like skip");
 
@@ -127,7 +127,7 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("R1"));
         Main.state.deck.add(Card.from("R2"));
-        String drawTwoMessage = ActionEffects.apply("R+2", Main.state, () -> Main.state.draw(Main.random).code());
+        String drawTwoMessage = ActionEffects.apply(Card.from("R+2"), Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.hands.get(1).size() == 2 && Main.state.currentPlayer == 2) passed++;
         else fail("draw two gives cards and skips");
         if (drawTwoMessage.equals("Bot2 draws two.")) passed++;
@@ -141,7 +141,7 @@ public class CharacterizationTests {
         Main.state.deck.add(Card.from("R2"));
         Main.state.deck.add(Card.from("R3"));
         Main.state.deck.add(Card.from("R4"));
-        String wildDrawFourMessage = ActionEffects.apply("W4", Main.state, () -> Main.state.draw(Main.random).code());
+        String wildDrawFourMessage = ActionEffects.apply(Card.from("W4"), Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.hands.get(1).size() == 4 && Main.state.currentPlayer == 2) passed++;
         else fail("wild draw four gives cards and skips");
         if (wildDrawFourMessage.equals("Bot2 draws four.")) passed++;
@@ -153,7 +153,7 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("R8"));
         int beforePenaltySize = Main.state.hands.get(0).size();
-        Main.state.hands.get(0).add(Main.state.draw(Main.random).code());
+        Main.state.hands.get(0).add(Main.state.draw(Main.random));
         Main.state.nextPlayer();
         if (Main.state.hands.get(0).size() == beforePenaltySize + 1 && Main.state.currentPlayer == 1) passed++;
         else fail("invalid index penalty draws card and loses turn");
@@ -162,9 +162,9 @@ public class CharacterizationTests {
         Main.state.hands.get(0).clear();
         Main.state.hands.get(1).clear();
         Main.state.hands.get(2).clear();
-        Main.state.hands.get(1).add("R5");
-        Main.state.hands.get(1).add("GS");
-        Main.state.hands.get(2).add("W");
+        Main.state.hands.get(1).add(Card.from("R5"));
+        Main.state.hands.get(1).add(Card.from("GS"));
+        Main.state.hands.get(2).add(Card.from("W"));
         if (ScoreCalculator.scoreForWinner(Main.state.hands, 0) == 75) passed++;
         else fail("winner score totals other hands");
 
@@ -175,9 +175,9 @@ public class CharacterizationTests {
         Main.state.calledColor = "";
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("R4"));
-        ArrayList<String> botDrawHand = Main.state.hands.get(0);
+        ArrayList<Card> botDrawHand = Main.state.hands.get(0);
         int autoPlayedDrawnCard = Main.handleDrawIfNeeded(-1, botDrawHand, "Bot1");
-        if (autoPlayedDrawnCard == 0 && botDrawHand.size() == 1 && botDrawHand.get(0).equals("R4")) passed++;
+        if (autoPlayedDrawnCard == 0 && botDrawHand.size() == 1 && botDrawHand.get(0).code().equals("R4")) passed++;
         else fail("bot auto-selects drawn legal card");
 
         Main.setupPlayers(3, false);
@@ -187,9 +187,9 @@ public class CharacterizationTests {
         Main.state.calledColor = "";
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("B3"));
-        ArrayList<String> botUnplayableDrawHand = Main.state.hands.get(0);
+        ArrayList<Card> botUnplayableDrawHand = Main.state.hands.get(0);
         int unplayableDrawChoice = Main.handleDrawIfNeeded(-1, botUnplayableDrawHand, "Bot1");
-        if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).equals("B3"))
+        if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).code().equals("B3"))
             passed++;
         else fail("bot keeps drawn illegal card without selecting it");
 
@@ -198,7 +198,7 @@ public class CharacterizationTests {
         Main.state.direction = 1;
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("R8"));
-        ArrayList<String> invalidIndexHand = Main.state.hands.get(0);
+        ArrayList<Card> invalidIndexHand = Main.state.hands.get(0);
         int invalidIndexBeforeSize = invalidIndexHand.size();
         boolean invalidIndexEndedGame = Main.resolveChosenCard(5, invalidIndexHand, "Bot1");
         if (!invalidIndexEndedGame && invalidIndexHand.size() == invalidIndexBeforeSize + 1 && Main.state.currentPlayer == 1)
@@ -212,8 +212,8 @@ public class CharacterizationTests {
         Main.state.calledColor = "";
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("G1"));
-        ArrayList<String> illegalCardHand = Main.state.hands.get(0);
-        illegalCardHand.add("B3");
+        ArrayList<Card> illegalCardHand = Main.state.hands.get(0);
+        illegalCardHand.add(Card.from("B3"));
         int illegalCardBeforeSize = illegalCardHand.size();
         boolean illegalCardEndedGame = Main.resolveChosenCard(0, illegalCardHand, "Bot1");
         if (!illegalCardEndedGame && illegalCardHand.size() == illegalCardBeforeSize + 1 && Main.state.currentPlayer == 1)

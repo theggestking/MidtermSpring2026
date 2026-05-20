@@ -5,7 +5,7 @@ import java.util.Random;
 public class GameState {
     ArrayList<String> playerNames = new ArrayList<String>();
     ArrayList<Boolean> humanPlayers = new ArrayList<Boolean>();
-    ArrayList<ArrayList<String>> hands = new ArrayList<ArrayList<String>>();
+    ArrayList<ArrayList<Card>> hands = new ArrayList<ArrayList<Card>>();
     ArrayList<Card> deck = new ArrayList<Card>();
     ArrayList<Card> discard = new ArrayList<Card>();
     int[] scores = new int[10];
