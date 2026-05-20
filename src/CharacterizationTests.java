@@ -23,21 +23,21 @@ public class CharacterizationTests {
         if (!CardRules.isLegal("B3", "R9", "")) passed++;
         else fail("illegal mismatch");
 
-        if (Main.parseCardIndex("0", 3) == 0) passed++;
+        if (InputParser.parseCardIndex("0", 3) == 0) passed++;
         else fail("parse valid index");
-        if (Main.parseCardIndex("2", 3) == 2) passed++;
+        if (InputParser.parseCardIndex("2", 3) == 2) passed++;
         else fail("parse last valid index");
-        if (Main.parseCardIndex("3", 3) == -1) passed++;
+        if (InputParser.parseCardIndex("3", 3) == -1) passed++;
         else fail("parse index out of range");
-        if (Main.parseCardIndex("R5", 3) == -1) passed++;
+        if (InputParser.parseCardIndex("R5", 3) == -1) passed++;
         else fail("parse non-index input");
-        if (Main.parseCardIndex("draw", 3) == -1) passed++;
+        if (InputParser.parseCardIndex("draw", 3) == -1) passed++;
         else fail("draw input is not a card index");
-        if (Main.parseCalledColor("r").equals("R")) passed++;
+        if (InputParser.parseCalledColor("r").equals("R")) passed++;
         else fail("parse lowercase called color");
-        if (Main.parseCalledColor("B").equals("B")) passed++;
+        if (InputParser.parseCalledColor("B").equals("B")) passed++;
         else fail("parse valid called color");
-        if (Main.parseCalledColor("purple").equals("")) passed++;
+        if (InputParser.parseCalledColor("purple").equals("")) passed++;
         else fail("parse invalid called color");
 
         if (Card.isValid("R5")) passed++;

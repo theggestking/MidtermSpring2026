@@ -32,7 +32,7 @@ public class ConsoleView {
                 return -1;
             }
 
-            int index = Main.parseCardIndex(input, hand.size());
+            int index = InputParser.parseCardIndex(input, hand.size());
             if (index != -1) {
                 return index;
             }
@@ -53,7 +53,7 @@ public class ConsoleView {
     String askColor() {
         while (true) {
             System.out.print("Call color R/Y/G/B: ");
-            String parsedColor = Main.parseCalledColor(scanner.nextLine());
+            String parsedColor = InputParser.parseCalledColor(scanner.nextLine());
             if (!parsedColor.equals("")) {
                 return parsedColor;
             }
