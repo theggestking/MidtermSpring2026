@@ -1,7 +1,9 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 public class CharacterizationTests {
     private static int passed = 0;
+    private static final Random TEST_RANDOM = new Random(123);
 
     private CharacterizationTests() {
     }
@@ -87,7 +89,7 @@ public class CharacterizationTests {
         state.clearDeck();
         state.clearDiscard();
 
-        check(state.draw(Main.random).code().equals("W"), "empty deck fallback");
+        check(state.draw(TEST_RANDOM).code().equals("W"), "empty deck fallback");
     }
 
     private static void testActionEffects() {
@@ -127,13 +129,13 @@ public class CharacterizationTests {
         state.clearDeck();
         state.addToDeck(Card.from("R8"));
         int beforePenaltySize = state.handSize(0);
-        state.addCardToPlayer(0, state.draw(Main.random));
+        state.addCardToPlayer(0, state.draw(TEST_RANDOM));
         state.nextPlayer();
         check(state.handSize(0) == beforePenaltySize + 1 && state.currentPlayerIndex() == 1,
                 "invalid index penalty draws card and loses turn");
 
         state = threeBotState();
-        TurnController controller = new TurnController(state, Main.random, Main.view, true);
+        TurnController controller = new TurnController(state, TEST_RANDOM, Main.view, true);
         state.clearDeck();
         state.addToDeck(Card.from("R8"));
         int invalidIndexBeforeSize = state.currentHandSize();
@@ -142,7 +144,7 @@ public class CharacterizationTests {
                 "resolve invalid index penalty and turn loss");
 
         state = threeBotState();
-        controller = new TurnController(state, Main.random, Main.view, true);
+        controller = new TurnController(state, TEST_RANDOM, Main.view, true);
         state.setUpCard(Card.from("R9"));
         state.clearCalledColor();
         state.clearDeck();
@@ -169,7 +171,7 @@ public class CharacterizationTests {
 
     private static void testDrawnCardBehavior() {
         GameState state = threeBotState();
-        TurnController controller = new TurnController(state, Main.random, Main.view, true);
+        TurnController controller = new TurnController(state, TEST_RANDOM, Main.view, true);
         state.setUpCard(Card.from("R9"));
         state.clearCalledColor();
         state.clearDeck();
@@ -180,7 +182,7 @@ public class CharacterizationTests {
                 "bot auto-selects drawn legal card");
 
         state = threeBotState();
-        controller = new TurnController(state, Main.random, Main.view, true);
+        controller = new TurnController(state, TEST_RANDOM, Main.view, true);
         state.setUpCard(Card.from("R9"));
         state.clearCalledColor();
         state.clearDeck();
@@ -218,7 +220,7 @@ public class CharacterizationTests {
         }
 
         public Card get() {
-            return state.draw(Main.random);
+            return state.draw(TEST_RANDOM);
         }
     }
 
