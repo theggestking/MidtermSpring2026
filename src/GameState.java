@@ -2,129 +2,109 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class GameState {
-    private ArrayList<String> playerNames = new ArrayList<String>();
-    private ArrayList<Boolean> humanPlayers = new ArrayList<Boolean>();
-    private ArrayList<ArrayList<Card>> hands = new ArrayList<ArrayList<Card>>();
+    private PlayerTable players = new PlayerTable();
     private CardPiles piles = new CardPiles();
-    private int[] scores = new int[10];
-    private int currentPlayer = 0;
-    private int direction = 1;
-    private String calledColor = "";
+    private ScoreBoard scoreBoard = new ScoreBoard();
+    private TurnState turnState = new TurnState();
 
     void clearPlayers() {
-        playerNames.clear();
-        humanPlayers.clear();
-        hands.clear();
+        players.clearPlayers();
     }
 
     void addPlayer(String name, boolean human) {
-        playerNames.add(name);
-        humanPlayers.add(Boolean.valueOf(human));
-        hands.add(new ArrayList<Card>());
+        players.addPlayer(name, human);
     }
 
     int playerCount() {
-        return playerNames.size();
+        return players.playerCount();
     }
 
     String playerName(int player) {
-        return playerNames.get(player);
+        return players.playerName(player);
     }
 
     String currentPlayerName() {
-        return playerNames.get(currentPlayer);
+        return players.playerName(turnState.currentPlayerIndex());
     }
 
     int currentPlayerIndex() {
-        return currentPlayer;
+        return turnState.currentPlayerIndex();
     }
 
     void setCurrentPlayer(int player) {
-        currentPlayer = player;
+        turnState.setCurrentPlayer(player);
     }
 
     boolean isCurrentPlayerHuman() {
-        return humanPlayers.get(currentPlayer).booleanValue();
+        return players.isHuman(turnState.currentPlayerIndex());
     }
 
     int direction() {
-        return direction;
+        return turnState.direction();
     }
 
     void setDirection(int newDirection) {
-        direction = newDirection;
+        turnState.setDirection(newDirection);
     }
 
     void resetDirection() {
-        direction = 1;
+        turnState.resetDirection();
     }
 
     void chooseRandomCurrentPlayer(Random random) {
-        currentPlayer = random.nextInt(playerNames.size());
+        turnState.chooseRandomCurrentPlayer(random, players.playerCount());
     }
 
     void nextPlayer() {
-        currentPlayer += direction;
-        if (currentPlayer >= playerNames.size()) {
-            currentPlayer = 0;
-        }
-        if (currentPlayer < 0) {
-            currentPlayer = playerNames.size() - 1;
-        }
+        turnState.nextPlayer(players.playerCount());
     }
 
     ArrayList<Card> currentHandSnapshot() {
-        return new ArrayList<Card>(hands.get(currentPlayer));
+        return players.handSnapshot(turnState.currentPlayerIndex());
     }
 
     ArrayList<Card> handSnapshot(int player) {
-        return new ArrayList<Card>(hands.get(player));
+        return players.handSnapshot(player);
     }
 
     ArrayList<ArrayList<Card>> handsSnapshot() {
-        ArrayList<ArrayList<Card>> copy = new ArrayList<ArrayList<Card>>();
-        for (int i = 0; i < hands.size(); i++) {
-            copy.add(new ArrayList<Card>(hands.get(i)));
-        }
-        return copy;
+        return players.handsSnapshot();
     }
 
     int currentHandSize() {
-        return hands.get(currentPlayer).size();
+        return players.handSize(turnState.currentPlayerIndex());
     }
 
     int handSize(int player) {
-        return hands.get(player).size();
+        return players.handSize(player);
     }
 
     Card cardInCurrentHand(int index) {
-        return hands.get(currentPlayer).get(index);
+        return players.cardInHand(turnState.currentPlayerIndex(), index);
     }
 
     Card cardInHand(int player, int index) {
-        return hands.get(player).get(index);
+        return players.cardInHand(player, index);
     }
 
     void addCardToCurrentPlayer(Card card) {
-        hands.get(currentPlayer).add(card);
+        players.addCardToPlayer(turnState.currentPlayerIndex(), card);
     }
 
     void addCardToPlayer(int player, Card card) {
-        hands.get(player).add(card);
+        players.addCardToPlayer(player, card);
     }
 
     Card removeCardFromCurrentHand(int index) {
-        return hands.get(currentPlayer).remove(index);
+        return players.removeCardFromHand(turnState.currentPlayerIndex(), index);
     }
 
     void clearHand(int player) {
-        hands.get(player).clear();
+        players.clearHand(player);
     }
 
     void clearHands() {
-        for (int i = 0; i < hands.size(); i++) {
-            hands.get(i).clear();
-        }
+        players.clearHands();
     }
 
     void clearDeck() {
@@ -160,23 +140,23 @@ public class GameState {
     }
 
     String calledColor() {
-        return calledColor;
+        return turnState.calledColor();
     }
 
     void setCalledColor(String color) {
-        calledColor = color;
+        turnState.setCalledColor(color);
     }
 
     void clearCalledColor() {
-        calledColor = "";
+        turnState.clearCalledColor();
     }
 
     int scoreForPlayer(int player) {
-        return scores[player];
+        return scoreBoard.scoreForPlayer(player);
     }
 
     void addScoreToPlayer(int player, int points) {
-        scores[player] += points;
+        scoreBoard.addScoreToPlayer(player, points);
     }
 
     void buildDeck(Random random) {
