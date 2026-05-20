@@ -4,11 +4,13 @@ public class ActionEffects {
     private ActionEffects() {
     }
 
-    static void apply(String card, GameState state, Supplier<String> drawCard, boolean quiet) {
+    static String apply(String card, GameState state, Supplier<String> drawCard) {
         String cardRank = CardRules.rank(card);
+
         if (cardRank.equals("SKIP")) {
             state.nextPlayer();
             state.nextPlayer();
+            return "";
         } else if (cardRank.equals("REVERSE")) {
             state.direction = state.direction * -1;
             if (state.playerNames.size() == 2) {
@@ -17,25 +19,25 @@ public class ActionEffects {
             } else {
                 state.nextPlayer();
             }
+            return "";
         } else if (cardRank.equals("DRAW_TWO")) {
             state.nextPlayer();
             state.hands.get(state.currentPlayer).add(drawCard.get());
             state.hands.get(state.currentPlayer).add(drawCard.get());
-            if (!quiet) {
-                System.out.println(state.playerNames.get(state.currentPlayer) + " draws two.");
-            }
+            String message = state.playerNames.get(state.currentPlayer) + " draws two.";
             state.nextPlayer();
+            return message;
         } else if (cardRank.equals("WILD_DRAW_FOUR")) {
             state.nextPlayer();
             for (int i = 0; i < 4; i++) {
                 state.hands.get(state.currentPlayer).add(drawCard.get());
             }
-            if (!quiet) {
-                System.out.println(state.playerNames.get(state.currentPlayer) + " draws four.");
-            }
+            String message = state.playerNames.get(state.currentPlayer) + " draws four.";
             state.nextPlayer();
+            return message;
         } else {
             state.nextPlayer();
+            return "";
         }
     }
 }

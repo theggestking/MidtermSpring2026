@@ -166,7 +166,10 @@ public class Main {
                     return;
                 }
 
-                ActionEffects.apply(card, state, Main::draw, quiet);
+                String effectMessage = ActionEffects.apply(card, state, Main::draw);
+                if (!quiet && !effectMessage.equals("")) {
+                    System.out.println(effectMessage);
+                }
             } else {
                 state.nextPlayer();
             }

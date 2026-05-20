@@ -94,21 +94,21 @@ public class CharacterizationTests {
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RS", Main.state, Main::draw, Main.quiet);
+        ActionEffects.apply("RS", Main.state, Main::draw);
         if (Main.state.currentPlayer == 2) passed++;
         else fail("skip advances past next player");
 
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RR", Main.state, Main::draw, Main.quiet);
+        ActionEffects.apply("RR", Main.state, Main::draw);
         if (Main.state.direction == -1 && Main.state.currentPlayer == 2) passed++;
         else fail("reverse changes direction");
 
         Main.setupPlayers(1, true);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RR", Main.state, Main::draw, Main.quiet);
+        ActionEffects.apply("RR", Main.state, Main::draw);
         if (Main.state.currentPlayer == 0) passed++;
         else fail("two player reverse acts like skip");
 
@@ -118,9 +118,11 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add("R1");
         Main.state.deck.add("R2");
-        ActionEffects.apply("R+2", Main.state, Main::draw, Main.quiet);
+        String drawTwoMessage = ActionEffects.apply("R+2", Main.state, Main::draw);
         if (Main.state.hands.get(1).size() == 2 && Main.state.currentPlayer == 2) passed++;
         else fail("draw two gives cards and skips");
+        if (drawTwoMessage.equals("Bot2 draws two.")) passed++;
+        else fail("draw two effect message");
 
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
@@ -130,9 +132,11 @@ public class CharacterizationTests {
         Main.state.deck.add("R2");
         Main.state.deck.add("R3");
         Main.state.deck.add("R4");
-        ActionEffects.apply("W4", Main.state, Main::draw, Main.quiet);
+        String wildDrawFourMessage = ActionEffects.apply("W4", Main.state, Main::draw);
         if (Main.state.hands.get(1).size() == 4 && Main.state.currentPlayer == 2) passed++;
         else fail("wild draw four gives cards and skips");
+        if (wildDrawFourMessage.equals("Bot2 draws four.")) passed++;
+        else fail("wild draw four effect message");
 
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
