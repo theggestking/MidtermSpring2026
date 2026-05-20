@@ -1,10 +1,10 @@
 public class Card {
     private final String code;
-    private final String color;
-    private final String rank;
+    private final CardColor color;
+    private final CardRank rank;
     private final int number;
 
-    private Card(String code, String color, String rank, int number) {
+    private Card(String code, CardColor color, CardRank rank, int number) {
         this.code = code;
         this.color = color;
         this.rank = rank;
@@ -17,38 +17,36 @@ public class Card {
         }
 
         if (code.equals("W")) {
-            return new Card(code, "", "WILD", -1);
+            return new Card(code, CardColor.NONE, CardRank.WILD, -1);
         }
 
         if (code.equals("W4")) {
-            return new Card(code, "", "WILD_DRAW_FOUR", -1);
+            return new Card(code, CardColor.NONE, CardRank.WILD_DRAW_FOUR, -1);
         }
 
         if (code.length() < 2) {
             throw new IllegalArgumentException("Invalid card code: " + code);
         }
 
-        String color = code.substring(0, 1);
-        if (!isColor(color)) {
-            throw new IllegalArgumentException("Invalid card color: " + code);
-        }
+        String colorCode = code.substring(0, 1);
+        CardColor color = CardColor.fromCode(colorCode);
 
         String suffix = code.substring(1);
 
         if (suffix.equals("S")) {
-            return new Card(code, color, "SKIP", -1);
+            return new Card(code, color, CardRank.SKIP, -1);
         }
 
         if (suffix.equals("R")) {
-            return new Card(code, color, "REVERSE", -1);
+            return new Card(code, color, CardRank.REVERSE, -1);
         }
 
         if (suffix.equals("+2")) {
-            return new Card(code, color, "DRAW_TWO", -1);
+            return new Card(code, color, CardRank.DRAW_TWO, -1);
         }
 
         if (isNumeric(suffix)) {
-            return new Card(code, color, "NUMBER", Integer.parseInt(suffix));
+            return new Card(code, color, CardRank.NUMBER, Integer.parseInt(suffix));
         }
 
         throw new IllegalArgumentException("Invalid card code: " + code);
@@ -76,18 +74,31 @@ public class Card {
     }
 
     static boolean isColor(String color) {
-        return color.equals("R") || color.equals("Y") || color.equals("G") || color.equals("B");
+        try {
+            CardColor.fromCode(color);
+            return !CardColor.fromCode(color).equals(CardColor.NONE);
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     boolean isWild() {
-        return rank.equals("WILD") || rank.equals("WILD_DRAW_FOUR");
+        return rank == CardRank.WILD || rank == CardRank.WILD_DRAW_FOUR;
     }
 
     String color() {
+        return color.code();
+    }
+
+    CardColor colorValue() {
         return color;
     }
 
     String rank() {
+        return rank.name();
+    }
+
+    CardRank rankValue() {
         return rank;
     }
 
@@ -96,13 +107,13 @@ public class Card {
     }
 
     int points() {
-        if (rank.equals("NUMBER")) {
+        if (rank == CardRank.NUMBER) {
             return number;
         }
-        if (rank.equals("SKIP") || rank.equals("REVERSE") || rank.equals("DRAW_TWO")) {
+        if (rank == CardRank.SKIP || rank == CardRank.REVERSE || rank == CardRank.DRAW_TWO) {
             return 20;
         }
-        if (rank.equals("WILD") || rank.equals("WILD_DRAW_FOUR")) {
+        if (rank == CardRank.WILD || rank == CardRank.WILD_DRAW_FOUR) {
             return 50;
         }
         return 0;
@@ -111,4 +122,50 @@ public class Card {
     String code() {
         return code;
     }
+}
+
+enum CardColor {
+    RED("R"),
+    YELLOW("Y"),
+    GREEN("G"),
+    BLUE("B"),
+    NONE("");
+
+    private final String code;
+
+    CardColor(String code) {
+        this.code = code;
+    }
+
+    String code() {
+        return code;
+    }
+
+    static CardColor fromCode(String code) {
+        if (code.equals("R")) {
+            return RED;
+        }
+        if (code.equals("Y")) {
+            return YELLOW;
+        }
+        if (code.equals("G")) {
+            return GREEN;
+        }
+        if (code.equals("B")) {
+            return BLUE;
+        }
+        if (code.equals("")) {
+            return NONE;
+        }
+        throw new IllegalArgumentException("Invalid card color: " + code);
+    }
+}
+
+enum CardRank {
+    NUMBER,
+    SKIP,
+    REVERSE,
+    DRAW_TWO,
+    WILD,
+    WILD_DRAW_FOUR
 }

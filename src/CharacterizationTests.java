@@ -48,6 +48,10 @@ public class CharacterizationTests {
         else fail("two-digit number helper behavior preserved");
         if (!Card.isValid("Q5")) passed++;
         else fail("invalid color rejected");
+        if (Card.from("R5").colorValue() == CardColor.RED) passed++;
+        else fail("card color enum");
+        if (Card.from("W4").rankValue() == CardRank.WILD_DRAW_FOUR) passed++;
+        else fail("card rank enum");
 
         ArrayList<Card> h = new ArrayList<Card>();
         h.add(Card.from("B3"));

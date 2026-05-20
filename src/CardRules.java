@@ -9,16 +9,16 @@ public class CardRules {
         if (candidate.isWild()) {
             return true;
         }
-        if (candidate.color().equals(upCard.color())) {
+        if (candidate.colorValue() == upCard.colorValue()) {
             return true;
         }
         if (!call.equals("") && candidate.color().equals(call)) {
             return true;
         }
-        if (candidate.rank().equals(upCard.rank()) && !candidate.rank().equals("NUMBER")) {
+        if (candidate.rankValue() == upCard.rankValue() && candidate.rankValue() != CardRank.NUMBER) {
             return true;
         }
-        if (candidate.rank().equals("NUMBER") && upCard.rank().equals("NUMBER") && candidate.number() == upCard.number()) {
+        if (candidate.rankValue() == CardRank.NUMBER && upCard.rankValue() == CardRank.NUMBER && candidate.number() == upCard.number()) {
             return true;
         }
         return false;
