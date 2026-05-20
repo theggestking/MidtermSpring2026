@@ -3,10 +3,10 @@ import java.util.Random;
 public class TurnResolver {
     private final GameState state;
     private final Random random;
-    private final ConsoleView view;
+    private final GameView view;
     private final boolean quiet;
 
-    TurnResolver(GameState state, Random random, ConsoleView view, boolean quiet) {
+    TurnResolver(GameState state, Random random, GameView view, boolean quiet) {
         this.state = state;
         this.random = random;
         this.view = view;

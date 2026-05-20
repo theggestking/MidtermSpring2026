@@ -4,12 +4,12 @@ import java.util.Random;
 public class TurnController {
     private final GameState state;
     private final Random random;
-    private final ConsoleView view;
+    private final GameView view;
     private final boolean quiet;
     private final MoveSelector moveSelector;
     private final TurnResolver turnResolver;
 
-    TurnController(GameState state, Random random, ConsoleView view, boolean quiet) {
+    TurnController(GameState state, Random random, GameView view, boolean quiet) {
         this.state = state;
         this.random = random;
         this.view = view;

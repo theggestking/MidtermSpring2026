@@ -6,7 +6,7 @@ public class Main {
     static boolean quiet = false;
     static Random random = new Random();
     static Scanner scanner = new Scanner(System.in);
-    static ConsoleView view = new ConsoleView(scanner);
+    static GameView view = new ConsoleView(scanner);
 
     public static void main(String[] args) {
         int bots = 3;
