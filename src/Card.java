@@ -75,8 +75,8 @@ public class Card {
 
     static boolean isColor(String color) {
         try {
-            CardColor.fromCode(color);
-            return !CardColor.fromCode(color).equals(CardColor.NONE);
+            CardColor parsed = CardColor.fromCode(color);
+            return parsed != CardColor.NONE;
         } catch (IllegalArgumentException ex) {
             return false;
         }
