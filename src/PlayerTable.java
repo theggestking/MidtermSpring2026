@@ -1,69 +1,63 @@
 import java.util.ArrayList;
 
 public class PlayerTable {
-    private ArrayList<String> playerNames = new ArrayList<String>();
-    private ArrayList<Boolean> humanPlayers = new ArrayList<Boolean>();
-    private ArrayList<ArrayList<Card>> hands = new ArrayList<ArrayList<Card>>();
+    private ArrayList<Player> players = new ArrayList<Player>();
 
     void clearPlayers() {
-        playerNames.clear();
-        humanPlayers.clear();
-        hands.clear();
+        players.clear();
     }
 
     void addPlayer(String name, boolean human) {
-        playerNames.add(name);
-        humanPlayers.add(Boolean.valueOf(human));
-        hands.add(new ArrayList<Card>());
+        players.add(new Player(name, human));
     }
 
     int playerCount() {
-        return playerNames.size();
+        return players.size();
     }
 
     String playerName(int player) {
-        return playerNames.get(player);
+        return players.get(player).name();
     }
 
     boolean isHuman(int player) {
-        return humanPlayers.get(player).booleanValue();
+        return players.get(player).isHuman();
     }
 
     ArrayList<Card> handSnapshot(int player) {
-        return new ArrayList<Card>(hands.get(player));
+        return players.get(player).handSnapshot();
     }
 
     ArrayList<ArrayList<Card>> handsSnapshot() {
         ArrayList<ArrayList<Card>> copy = new ArrayList<ArrayList<Card>>();
-        for (int i = 0; i < hands.size(); i++) {
-            copy.add(new ArrayList<Card>(hands.get(i)));
+        for (int i = 0; i < players.size(); i++) {
+            copy.add(players.get(i).handSnapshot());
         }
         return copy;
     }
 
     int handSize(int player) {
-        return hands.get(player).size();
+        return players.get(player).handSize();
     }
 
     Card cardInHand(int player, int index) {
-        return hands.get(player).get(index);
+        return players.get(player).cardInHand(index);
     }
 
     void addCardToPlayer(int player, Card card) {
-        hands.get(player).add(card);
+        players.get(player).addCard(card);
     }
 
     Card removeCardFromHand(int player, int index) {
-        return hands.get(player).remove(index);
+        return players.get(player).removeCard(index);
     }
 
     void clearHand(int player) {
-        hands.get(player).clear();
+        players.get(player).clearHand();
     }
 
     void clearHands() {
-        for (int i = 0; i < hands.size(); i++) {
-            hands.get(i).clear();
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).clearHand();
         }
     }
 }
