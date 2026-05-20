@@ -97,15 +97,15 @@ public class Main {
 
     static void renderTurn(String name, ArrayList<String> hand) {
         if (!quiet) {
-            view.showTurn(state.upCard, state.calledColor, name, hand);
+            view.showTurn(state.upCardCode(), state.calledColor, name, hand);
         }
     }
 
     static int chooseMove(ArrayList<String> hand) {
         if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-            return view.askHuman(hand, state.upCard, state.calledColor);
+            return view.askHuman(hand, state.upCardCode(), state.calledColor);
         }
-        return BotStrategy.chooseCard(hand, state.upCard, state.calledColor);
+        return BotStrategy.chooseCard(hand, state.upCardCode(), state.calledColor);
     }
 
     static int handleDrawIfNeeded(int chosen, ArrayList<String> hand, String name) {
@@ -113,14 +113,14 @@ public class Main {
             return chosen;
         }
 
-        String drawn = state.draw(random);
+        String drawn = state.draw(random).code();
         hand.add(drawn);
 
         if (!quiet) {
             view.showDraw(name, drawn);
         }
 
-        if (CardRules.isLegal(drawn, state.upCard, state.calledColor)) {
+        if (CardRules.isLegal(drawn, state.upCardCode(), state.calledColor)) {
             if (!state.humanPlayers.get(state.currentPlayer).booleanValue()) {
                 return hand.size() - 1;
             }
@@ -143,26 +143,26 @@ public class Main {
             if (!quiet) {
                 view.showInvalidIndexPenalty(name);
             }
-            hand.add(state.draw(random));
+            hand.add(state.draw(random).code());
             state.nextPlayer();
             return false;
         }
 
         String card = hand.get(chosen);
-        boolean ok = CardRules.isLegal(card, state.upCard, state.calledColor);
+        boolean ok = CardRules.isLegal(card, state.upCardCode(), state.calledColor);
 
         if (!ok) {
             if (!quiet) {
                 view.showIllegalCardPenalty(name, card);
             }
-            hand.add(state.draw(random));
+            hand.add(state.draw(random).code());
             state.nextPlayer();
             return false;
         }
 
         hand.remove(chosen);
         state.discard.add(state.upCard);
-        state.upCard = card;
+        state.upCard = Card.from(card);
         state.calledColor = "";
 
         if (!quiet) {
@@ -193,7 +193,7 @@ public class Main {
             return true;
         }
 
-        String effectMessage = ActionEffects.apply(card, state, () -> state.draw(random));
+        String effectMessage = ActionEffects.apply(card, state, () -> state.draw(random).code());
         if (!quiet && !effectMessage.equals("")) {
             view.showEffectMessage(effectMessage);
         }
@@ -209,11 +209,11 @@ public class Main {
         }
         for (int i = 0; i < state.playerNames.size(); i++) {
             for (int j = 0; j < 7; j++) {
-                state.hands.get(i).add(state.draw(random));
+                state.hands.get(i).add(state.draw(random).code());
             }
         }
         state.upCard = state.draw(random);
-        while (state.upCard.startsWith("W")) {
+        while (state.upCard.isWild()) {
             state.discard.add(state.upCard);
             state.upCard = state.draw(random);
         }

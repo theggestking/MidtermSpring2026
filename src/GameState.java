@@ -6,12 +6,12 @@ public class GameState {
     ArrayList<String> playerNames = new ArrayList<String>();
     ArrayList<Boolean> humanPlayers = new ArrayList<Boolean>();
     ArrayList<ArrayList<String>> hands = new ArrayList<ArrayList<String>>();
-    ArrayList<String> deck = new ArrayList<String>();
-    ArrayList<String> discard = new ArrayList<String>();
+    ArrayList<Card> deck = new ArrayList<Card>();
+    ArrayList<Card> discard = new ArrayList<Card>();
     int[] scores = new int[10];
     int currentPlayer = 0;
     int direction = 1;
-    String upCard = "";
+    Card upCard = Card.from("R0");
     String calledColor = "";
 
     void nextPlayer() {
@@ -24,37 +24,41 @@ public class GameState {
         }
     }
 
+    String upCardCode() {
+        return upCard.code();
+    }
+
     void buildDeck(Random random) {
         deck.clear();
         String[] colors = {"R", "Y", "G", "B"};
         for (int c = 0; c < colors.length; c++) {
-            deck.add(colors[c] + "0");
+            deck.add(Card.from(colors[c] + "0"));
             for (int n = 1; n <= 9; n++) {
-                deck.add(colors[c] + n);
-                deck.add(colors[c] + n);
+                deck.add(Card.from(colors[c] + n));
+                deck.add(Card.from(colors[c] + n));
             }
-            deck.add(colors[c] + "S");
-            deck.add(colors[c] + "S");
-            deck.add(colors[c] + "R");
-            deck.add(colors[c] + "R");
-            deck.add(colors[c] + "+2");
-            deck.add(colors[c] + "+2");
+            deck.add(Card.from(colors[c] + "S"));
+            deck.add(Card.from(colors[c] + "S"));
+            deck.add(Card.from(colors[c] + "R"));
+            deck.add(Card.from(colors[c] + "R"));
+            deck.add(Card.from(colors[c] + "+2"));
+            deck.add(Card.from(colors[c] + "+2"));
         }
         for (int i = 0; i < 4; i++) {
-            deck.add("W");
-            deck.add("W4");
+            deck.add(Card.from("W"));
+            deck.add(Card.from("W4"));
         }
         Collections.shuffle(deck, random);
     }
 
-    String draw(Random random) {
+    Card draw(Random random) {
         if (deck.size() == 0) {
             deck.addAll(discard);
             discard.clear();
             Collections.shuffle(deck, random);
         }
         if (deck.size() == 0) {
-            return "W";
+            return Card.from("W");
         }
         return deck.remove(0);
     }
