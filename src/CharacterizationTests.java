@@ -21,6 +21,7 @@ public class CharacterizationTests {
         testPenaltyBehavior();
         testScoring();
         testDrawnCardBehavior();
+        testHumanCanDrawEvenWithLegalCard();
 
         System.out.println("Passed " + passed + " characterization checks.");
     }
@@ -193,6 +194,25 @@ public class CharacterizationTests {
                 "bot keeps drawn illegal card without selecting it");
     }
 
+    private static void testHumanCanDrawEvenWithLegalCard() {
+        GameState state = twoPlayerState();
+        state.setUpCard(Card.from("R9"));
+        state.clearCalledColor();
+        state.addCardToCurrentPlayer(Card.from("R4"));
+        state.clearDeck();
+        state.addToDeck(Card.from("B3"));
+
+        TurnController controller = new TurnController(state, TEST_RANDOM, new DrawOnlyView(), true);
+
+        boolean endedGame = controller.takeTurn();
+
+        check(!endedGame, "human draw turn does not end game");
+        check(state.handSize(0) == 2, "human can draw even while holding legal card");
+        check(state.cardInHand(0, 0).code().equals("R4"), "human keeps legal card after choosing draw");
+        check(state.cardInHand(0, 1).code().equals("B3"), "human receives drawn card");
+        check(state.currentPlayerIndex() == 1, "human draw advances to next player");
+    }
+
     private static GameState threeBotState() {
         GameState state = new GameState();
         state.addPlayer("Bot1", false);
@@ -210,6 +230,16 @@ public class CharacterizationTests {
         state.setCurrentPlayer(0);
         state.setDirection(1);
         return state;
+    }
+
+    private static class DrawOnlyView extends TestGameView {
+        public String askMoveInput() {
+            return "DRAW";
+        }
+
+        public boolean askPlayDrawnCard(String drawn) {
+            return false;
+        }
     }
 
     private static class TestGameView implements GameView {
