@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -8,6 +7,7 @@ public class Main {
     static boolean quiet = false;
     static Random random = new Random();
     static Scanner scanner = new Scanner(System.in);
+    static ConsoleView view = new ConsoleView(scanner);
 
     public static void main(String[] args) {
         int bots = 3;
@@ -45,15 +45,12 @@ public class Main {
 
         for (int g = 1; g <= games; g++) {
             if (!quiet) {
-                System.out.println("\n=== Game " + g + " ===");
+                view.showGameHeader(g);
             }
             playGame();
         }
 
-        System.out.println("\nFinal scores:");
-        for (int i = 0; i < state.playerNames.size(); i++) {
-            System.out.println(state.playerNames.get(i) + ": " + state.scores[i]);
-        }
+        view.showFinalScores(state);
     }
 
     static void setupPlayers(int bots, boolean human) {
@@ -84,7 +81,7 @@ public class Main {
         }
 
         if (!quiet) {
-            System.out.println("Game stopped at safety limit.");
+            view.showSafetyLimit();
         }
     }
 
@@ -100,14 +97,13 @@ public class Main {
 
     static void renderTurn(String name, ArrayList<String> hand) {
         if (!quiet) {
-            System.out.println("\nUp card: " + state.upCard + (state.calledColor.equals("") ? "" : " called " + state.calledColor));
-            System.out.println(name + " hand: " + join(hand));
+            view.showTurn(state.upCard, state.calledColor, name, hand);
         }
     }
 
     static int chooseMove(ArrayList<String> hand) {
         if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-            return askHuman(hand);
+            return view.askHuman(hand, state.upCard, state.calledColor);
         }
         return BotStrategy.chooseCard(hand, state.upCard, state.calledColor);
     }
@@ -121,7 +117,7 @@ public class Main {
         hand.add(drawn);
 
         if (!quiet) {
-            System.out.println(name + " draws " + drawn);
+            view.showDraw(name, drawn);
         }
 
         if (CardRules.isLegal(drawn, state.upCard, state.calledColor)) {
@@ -129,9 +125,7 @@ public class Main {
                 return hand.size() - 1;
             }
 
-            System.out.print("Play drawn card " + drawn + "? y/n: ");
-            String answer = scanner.nextLine();
-            if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
+            if (view.askPlayDrawnCard(drawn)) {
                 return hand.size() - 1;
             }
         }
@@ -147,7 +141,7 @@ public class Main {
 
         if (chosen >= hand.size()) {
             if (!quiet) {
-                System.out.println(name + " selected an invalid index and draws a penalty card.");
+                view.showInvalidIndexPenalty(name);
             }
             hand.add(state.draw(random));
             state.nextPlayer();
@@ -159,7 +153,7 @@ public class Main {
 
         if (!ok) {
             if (!quiet) {
-                System.out.println(name + " tried illegal card " + card + " and draws a penalty card.");
+                view.showIllegalCardPenalty(name, card);
             }
             hand.add(state.draw(random));
             state.nextPlayer();
@@ -172,36 +166,36 @@ public class Main {
         state.calledColor = "";
 
         if (!quiet) {
-            System.out.println(name + " plays " + card);
+            view.showPlayedCard(name, card);
         }
 
         if (card.equals("W") || card.equals("W4")) {
             if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-                state.calledColor = askColor();
+                state.calledColor = view.askColor();
             } else {
                 state.calledColor = BotStrategy.chooseColor(hand);
             }
             if (!quiet) {
-                System.out.println(name + " calls " + state.calledColor);
+                view.showCalledColor(name, state.calledColor);
             }
         }
 
         if (hand.size() == 1 && !quiet) {
-            System.out.println(name + " says UNO!");
+            view.showUno(name);
         }
 
         if (hand.size() == 0) {
             int points = ScoreCalculator.scoreForWinner(state.hands, state.currentPlayer);
             state.scores[state.currentPlayer] += points;
             if (!quiet) {
-                System.out.println(name + " wins and scores " + points);
+                view.showWin(name, points);
             }
             return true;
         }
 
         String effectMessage = ActionEffects.apply(card, state, () -> state.draw(random));
         if (!quiet && !effectMessage.equals("")) {
-            System.out.println(effectMessage);
+            view.showEffectMessage(effectMessage);
         }
 
         return false;
@@ -245,50 +239,5 @@ public class Main {
             return color;
         }
         return "";
-    }
-
-    static int askHuman(ArrayList<String> hand) {
-        while (true) {
-            System.out.print("Choose card index/code or draw: ");
-            String input = scanner.nextLine().trim().toUpperCase();
-            if (input.equals("DRAW")) {
-                return -1;
-            }
-            int index = parseCardIndex(input, hand.size());
-            if (index != -1) {
-                return index;
-            }
-            for (int i = 0; i < hand.size(); i++) {
-                if (hand.get(i).equals(input)) {
-                    if (CardRules.isLegal(hand.get(i), state.upCard, state.calledColor)) {
-                        return i;
-                    }
-                    System.out.println("That card is not legal.");
-                }
-            }
-            System.out.println("Card not found.");
-        }
-    }
-
-    static String askColor() {
-        while (true) {
-            System.out.print("Call color R/Y/G/B: ");
-            String parsedColor = parseCalledColor(scanner.nextLine());
-            if (!parsedColor.equals("")) {
-                return parsedColor;
-            }
-            System.out.println("Bad color.");
-        }
-    }
-
-    static String join(ArrayList<String> cards) {
-        String out = "";
-        for (int i = 0; i < cards.size(); i++) {
-            out += i + ":" + cards.get(i);
-            if (i < cards.size() - 1) {
-                out += " ";
-            }
-        }
-        return out;
     }
 }
