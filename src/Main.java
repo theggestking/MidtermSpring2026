@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -38,7 +37,7 @@ public class Main {
         random = new Random(seed);
         setupPlayers(bots, human);
 
-        if (state.playerNames.size() < 2 || state.playerNames.size() > 4) {
+        if (state.playerCount() < 2 || state.playerCount() > 4) {
             System.out.println("UNO needs 2 to 4 players.");
             return;
         }
@@ -56,18 +55,12 @@ public class Main {
     }
 
     static void setupPlayers(int bots, boolean human) {
-        state.playerNames.clear();
-        state.humanPlayers.clear();
-        state.hands.clear();
+        state.clearPlayers();
         if (human) {
-            state.playerNames.add("You");
-            state.humanPlayers.add(Boolean.TRUE);
-            state.hands.add(new ArrayList<Card>());
+            state.addPlayer("You", true);
         }
         for (int i = 1; i <= bots; i++) {
-            state.playerNames.add("Bot" + i);
-            state.humanPlayers.add(Boolean.FALSE);
-            state.hands.add(new ArrayList<Card>());
+            state.addPlayer("Bot" + i, false);
         }
     }
 }

@@ -31,107 +31,107 @@ public class TurnController {
     }
 
     boolean takeTurn() {
-        String name = state.playerNames.get(state.currentPlayer);
-        ArrayList<Card> hand = state.hands.get(state.currentPlayer);
+        String name = state.currentPlayerName();
+        ArrayList<Card> hand = state.currentHandSnapshot();
 
         renderTurn(name, hand);
         int chosen = chooseMove(hand);
-        chosen = handleDrawIfNeeded(chosen, hand, name);
-        return resolveChosenCard(chosen, hand, name);
+        chosen = handleDrawIfNeeded(chosen, name);
+        return resolveChosenCard(chosen, name);
     }
 
     private void renderTurn(String name, ArrayList<Card> hand) {
         if (!quiet) {
-            view.showTurn(state.upCardCode(), state.calledColor, name, hand);
+            view.showTurn(state.upCardCode(), state.calledColor(), name, hand);
         }
     }
 
     private int chooseMove(ArrayList<Card> hand) {
-        if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-            return view.askHuman(hand, state.upCardCode(), state.calledColor);
+        if (state.isCurrentPlayerHuman()) {
+            return view.askHuman(hand, state.upCardCode(), state.calledColor());
         }
-        return BotStrategy.chooseCard(hand, state.upCardCode(), state.calledColor);
+        return BotStrategy.chooseCard(hand, state.upCardCode(), state.calledColor());
     }
 
-    int handleDrawIfNeeded(int chosen, ArrayList<Card> hand, String name) {
+    int handleDrawIfNeeded(int chosen, String name) {
         if (chosen != -1) {
             return chosen;
         }
 
         Card drawn = state.draw(random);
-        hand.add(drawn);
+        state.addCardToCurrentPlayer(drawn);
 
         if (!quiet) {
             view.showDraw(name, drawn.code());
         }
 
-        if (CardRules.isLegal(drawn.code(), state.upCardCode(), state.calledColor)) {
-            if (!state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-                return hand.size() - 1;
+        if (CardRules.isLegal(drawn.code(), state.upCardCode(), state.calledColor())) {
+            if (!state.isCurrentPlayerHuman()) {
+                return state.currentHandSize() - 1;
             }
 
             if (view.askPlayDrawnCard(drawn.code())) {
-                return hand.size() - 1;
+                return state.currentHandSize() - 1;
             }
         }
 
         return chosen;
     }
 
-    boolean resolveChosenCard(int chosen, ArrayList<Card> hand, String name) {
+    boolean resolveChosenCard(int chosen, String name) {
         if (chosen < 0) {
             state.nextPlayer();
             return false;
         }
 
-        if (chosen >= hand.size()) {
+        if (chosen >= state.currentHandSize()) {
             if (!quiet) {
                 view.showInvalidIndexPenalty(name);
             }
-            hand.add(state.draw(random));
+            state.addCardToCurrentPlayer(state.draw(random));
             state.nextPlayer();
             return false;
         }
 
-        Card card = hand.get(chosen);
-        boolean ok = CardRules.isLegal(card.code(), state.upCardCode(), state.calledColor);
+        Card card = state.cardInCurrentHand(chosen);
+        boolean ok = CardRules.isLegal(card.code(), state.upCardCode(), state.calledColor());
 
         if (!ok) {
             if (!quiet) {
                 view.showIllegalCardPenalty(name, card.code());
             }
-            hand.add(state.draw(random));
+            state.addCardToCurrentPlayer(state.draw(random));
             state.nextPlayer();
             return false;
         }
 
-        hand.remove(chosen);
-        state.discard.add(state.upCard);
-        state.upCard = card;
-        state.calledColor = "";
+        state.removeCardFromCurrentHand(chosen);
+        state.discardUpCard();
+        state.setUpCard(card);
+        state.clearCalledColor();
 
         if (!quiet) {
             view.showPlayedCard(name, card.code());
         }
 
         if (card.isWild()) {
-            if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-                state.calledColor = view.askColor();
+            if (state.isCurrentPlayerHuman()) {
+                state.setCalledColor(view.askColor());
             } else {
-                state.calledColor = BotStrategy.chooseColor(hand);
+                state.setCalledColor(BotStrategy.chooseColor(state.currentHandSnapshot()));
             }
             if (!quiet) {
-                view.showCalledColor(name, state.calledColor);
+                view.showCalledColor(name, state.calledColor());
             }
         }
 
-        if (hand.size() == 1 && !quiet) {
+        if (state.currentHandSize() == 1 && !quiet) {
             view.showUno(name);
         }
 
-        if (hand.size() == 0) {
-            int points = ScoreCalculator.scoreForWinner(state.hands, state.currentPlayer);
-            state.scores[state.currentPlayer] += points;
+        if (state.currentHandSize() == 0) {
+            int points = ScoreCalculator.scoreForWinner(state.handsSnapshot(), state.currentPlayerIndex());
+            state.addScoreToPlayer(state.currentPlayerIndex(), points);
             if (!quiet) {
                 view.showWin(name, points);
             }
@@ -148,22 +148,23 @@ public class TurnController {
 
     void startNewGame() {
         state.buildDeck(random);
-        state.discard.clear();
-        for (int i = 0; i < state.hands.size(); i++) {
-            state.hands.get(i).clear();
-        }
-        for (int i = 0; i < state.playerNames.size(); i++) {
+        state.clearDiscard();
+        state.clearHands();
+
+        for (int i = 0; i < state.playerCount(); i++) {
             for (int j = 0; j < 7; j++) {
-                state.hands.get(i).add(state.draw(random));
+                state.addCardToPlayer(i, state.draw(random));
             }
         }
-        state.upCard = state.draw(random);
-        while (state.upCard.isWild()) {
-            state.discard.add(state.upCard);
-            state.upCard = state.draw(random);
+
+        state.setUpCard(state.draw(random));
+        while (state.isUpCardWild()) {
+            state.discardUpCard();
+            state.setUpCard(state.draw(random));
         }
-        state.calledColor = "";
-        state.direction = 1;
-        state.currentPlayer = random.nextInt(state.playerNames.size());
+
+        state.clearCalledColor();
+        state.resetDirection();
+        state.chooseRandomCurrentPlayer(random);
     }
 }

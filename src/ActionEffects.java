@@ -31,8 +31,8 @@ public class ActionEffects {
     }
 
     private static String applyReverse(GameState state) {
-        state.direction = state.direction * -1;
-        if (state.playerNames.size() == 2) {
+        state.setDirection(state.direction() * -1);
+        if (state.playerCount() == 2) {
             state.nextPlayer();
             state.nextPlayer();
         } else {
@@ -43,9 +43,9 @@ public class ActionEffects {
 
     private static String applyDrawTwo(GameState state, Supplier<Card> drawCard) {
         state.nextPlayer();
-        state.hands.get(state.currentPlayer).add(drawCard.get());
-        state.hands.get(state.currentPlayer).add(drawCard.get());
-        String message = state.playerNames.get(state.currentPlayer) + " draws two.";
+        state.addCardToCurrentPlayer(drawCard.get());
+        state.addCardToCurrentPlayer(drawCard.get());
+        String message = state.currentPlayerName() + " draws two.";
         state.nextPlayer();
         return message;
     }
@@ -53,9 +53,9 @@ public class ActionEffects {
     private static String applyWildDrawFour(GameState state, Supplier<Card> drawCard) {
         state.nextPlayer();
         for (int i = 0; i < 4; i++) {
-            state.hands.get(state.currentPlayer).add(drawCard.get());
+            state.addCardToCurrentPlayer(drawCard.get());
         }
-        String message = state.playerNames.get(state.currentPlayer) + " draws four.";
+        String message = state.currentPlayerName() + " draws four.";
         state.nextPlayer();
         return message;
     }

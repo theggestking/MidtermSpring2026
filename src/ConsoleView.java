@@ -14,8 +14,8 @@ public class ConsoleView {
 
     void showFinalScores(GameState state) {
         System.out.println("\nFinal scores:");
-        for (int i = 0; i < state.playerNames.size(); i++) {
-            System.out.println(state.playerNames.get(i) + ": " + state.scores[i]);
+        for (int i = 0; i < state.playerCount(); i++) {
+            System.out.println(state.playerName(i) + ": " + state.scoreForPlayer(i));
         }
     }
 

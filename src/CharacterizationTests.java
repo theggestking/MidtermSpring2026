@@ -53,9 +53,9 @@ public class CharacterizationTests {
         h.add(Card.from("B3"));
         h.add(Card.from("R4"));
         h.add(Card.from("W"));
-        Main.state.upCard = Card.from("R9");
-        Main.state.calledColor = "";
-        if (BotStrategy.chooseCard(h, Main.state.upCardCode(), Main.state.calledColor) == 1) passed++;
+        Main.state.setUpCard(Card.from("R9"));
+        Main.state.clearCalledColor();
+        if (BotStrategy.chooseCard(h, Main.state.upCardCode(), Main.state.calledColor()) == 1) passed++;
         else fail("bot normal before wild");
 
         ArrayList<Card> h2 = new ArrayList<Card>();
@@ -67,13 +67,13 @@ public class CharacterizationTests {
 
         ArrayList<Card> h3 = new ArrayList<Card>();
         h3.add(Card.from("B3"));
-        Main.state.upCard = Card.from("R9");
-        Main.state.calledColor = "";
-        if (BotStrategy.chooseCard(h3, Main.state.upCardCode(), Main.state.calledColor) == -1) passed++;
+        Main.state.setUpCard(Card.from("R9"));
+        Main.state.clearCalledColor();
+        if (BotStrategy.chooseCard(h3, Main.state.upCardCode(), Main.state.calledColor()) == -1) passed++;
         else fail("bot has no legal card before drawing");
 
         String drawnLegalCard = "R4";
-        if (CardRules.isLegal(drawnLegalCard, Main.state.upCardCode(), Main.state.calledColor)) passed++;
+        if (CardRules.isLegal(drawnLegalCard, Main.state.upCardCode(), Main.state.calledColor())) passed++;
         else fail("drawn bot card can be legal for auto-play");
 
         if (CardRules.isLegal("BS", "RS", "")) passed++;
@@ -97,128 +97,124 @@ public class CharacterizationTests {
 
         TurnController testController = new TurnController(Main.state, Main.random, Main.view, true);
 
-        Main.state.deck.clear();
-        Main.state.discard.clear();
+        Main.state.clearDeck();
+        Main.state.clearDiscard();
         if (Main.state.draw(Main.random).code().equals("W")) passed++;
         else fail("empty deck fallback");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
         ActionEffects.apply(Card.from("RS"), Main.state, () -> Main.state.draw(Main.random));
-        if (Main.state.currentPlayer == 2) passed++;
+        if (Main.state.currentPlayerIndex() == 2) passed++;
         else fail("skip advances past next player");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
         ActionEffects.apply(Card.from("RR"), Main.state, () -> Main.state.draw(Main.random));
-        if (Main.state.direction == -1 && Main.state.currentPlayer == 2) passed++;
+        if (Main.state.direction() == -1 && Main.state.currentPlayerIndex() == 2) passed++;
         else fail("reverse changes direction");
 
         Main.setupPlayers(1, true);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
         ActionEffects.apply(Card.from("RR"), Main.state, () -> Main.state.draw(Main.random));
-        if (Main.state.currentPlayer == 0) passed++;
+        if (Main.state.currentPlayerIndex() == 0) passed++;
         else fail("two player reverse acts like skip");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("R1"));
-        Main.state.deck.add(Card.from("R2"));
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("R1"));
+        Main.state.addToDeck(Card.from("R2"));
         String drawTwoMessage = ActionEffects.apply(Card.from("R+2"), Main.state, () -> Main.state.draw(Main.random));
-        if (Main.state.hands.get(1).size() == 2 && Main.state.currentPlayer == 2) passed++;
+        if (Main.state.handSize(1) == 2 && Main.state.currentPlayerIndex() == 2) passed++;
         else fail("draw two gives cards and skips");
         if (drawTwoMessage.equals("Bot2 draws two.")) passed++;
         else fail("draw two effect message");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("R1"));
-        Main.state.deck.add(Card.from("R2"));
-        Main.state.deck.add(Card.from("R3"));
-        Main.state.deck.add(Card.from("R4"));
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("R1"));
+        Main.state.addToDeck(Card.from("R2"));
+        Main.state.addToDeck(Card.from("R3"));
+        Main.state.addToDeck(Card.from("R4"));
         String wildDrawFourMessage = ActionEffects.apply(Card.from("W4"), Main.state, () -> Main.state.draw(Main.random));
-        if (Main.state.hands.get(1).size() == 4 && Main.state.currentPlayer == 2) passed++;
+        if (Main.state.handSize(1) == 4 && Main.state.currentPlayerIndex() == 2) passed++;
         else fail("wild draw four gives cards and skips");
         if (wildDrawFourMessage.equals("Bot2 draws four.")) passed++;
         else fail("wild draw four effect message");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("R8"));
-        int beforePenaltySize = Main.state.hands.get(0).size();
-        Main.state.hands.get(0).add(Main.state.draw(Main.random));
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("R8"));
+        int beforePenaltySize = Main.state.handSize(0);
+        Main.state.addCardToPlayer(0, Main.state.draw(Main.random));
         Main.state.nextPlayer();
-        if (Main.state.hands.get(0).size() == beforePenaltySize + 1 && Main.state.currentPlayer == 1) passed++;
+        if (Main.state.handSize(0) == beforePenaltySize + 1 && Main.state.currentPlayerIndex() == 1) passed++;
         else fail("invalid index penalty draws card and loses turn");
 
         Main.setupPlayers(3, false);
-        Main.state.hands.get(0).clear();
-        Main.state.hands.get(1).clear();
-        Main.state.hands.get(2).clear();
-        Main.state.hands.get(1).add(Card.from("R5"));
-        Main.state.hands.get(1).add(Card.from("GS"));
-        Main.state.hands.get(2).add(Card.from("W"));
-        if (ScoreCalculator.scoreForWinner(Main.state.hands, 0) == 75) passed++;
+        Main.state.clearHand(0);
+        Main.state.clearHand(1);
+        Main.state.clearHand(2);
+        Main.state.addCardToPlayer(1, Card.from("R5"));
+        Main.state.addCardToPlayer(1, Card.from("GS"));
+        Main.state.addCardToPlayer(2, Card.from("W"));
+        if (ScoreCalculator.scoreForWinner(Main.state.handsSnapshot(), 0) == 75) passed++;
         else fail("winner score totals other hands");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.upCard = Card.from("R9");
-        Main.state.calledColor = "";
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("R4"));
-        ArrayList<Card> botDrawHand = Main.state.hands.get(0);
-        int autoPlayedDrawnCard = testController.handleDrawIfNeeded(-1, botDrawHand, "Bot1");
-        if (autoPlayedDrawnCard == 0 && botDrawHand.size() == 1 && botDrawHand.get(0).code().equals("R4")) passed++;
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.setUpCard(Card.from("R9"));
+        Main.state.clearCalledColor();
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("R4"));
+        int autoPlayedDrawnCard = testController.handleDrawIfNeeded(-1, "Bot1");
+        if (autoPlayedDrawnCard == 0 && Main.state.currentHandSize() == 1 && Main.state.cardInCurrentHand(0).code().equals("R4")) passed++;
         else fail("bot auto-selects drawn legal card");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.upCard = Card.from("R9");
-        Main.state.calledColor = "";
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("B3"));
-        ArrayList<Card> botUnplayableDrawHand = Main.state.hands.get(0);
-        int unplayableDrawChoice = testController.handleDrawIfNeeded(-1, botUnplayableDrawHand, "Bot1");
-        if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).code().equals("B3"))
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.setUpCard(Card.from("R9"));
+        Main.state.clearCalledColor();
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("B3"));
+        int unplayableDrawChoice = testController.handleDrawIfNeeded(-1, "Bot1");
+        if (unplayableDrawChoice == -1 && Main.state.currentHandSize() == 1 && Main.state.cardInCurrentHand(0).code().equals("B3"))
             passed++;
         else fail("bot keeps drawn illegal card without selecting it");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("R8"));
-        ArrayList<Card> invalidIndexHand = Main.state.hands.get(0);
-        int invalidIndexBeforeSize = invalidIndexHand.size();
-        boolean invalidIndexEndedGame = testController.resolveChosenCard(5, invalidIndexHand, "Bot1");
-        if (!invalidIndexEndedGame && invalidIndexHand.size() == invalidIndexBeforeSize + 1 && Main.state.currentPlayer == 1)
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("R8"));
+        int invalidIndexBeforeSize = Main.state.currentHandSize();
+        boolean invalidIndexEndedGame = testController.resolveChosenCard(5, "Bot1");
+        if (!invalidIndexEndedGame && Main.state.handSize(0) == invalidIndexBeforeSize + 1 && Main.state.currentPlayerIndex() == 1)
             passed++;
         else fail("resolve invalid index penalty and turn loss");
 
         Main.setupPlayers(3, false);
-        Main.state.currentPlayer = 0;
-        Main.state.direction = 1;
-        Main.state.upCard = Card.from("R9");
-        Main.state.calledColor = "";
-        Main.state.deck.clear();
-        Main.state.deck.add(Card.from("G1"));
-        ArrayList<Card> illegalCardHand = Main.state.hands.get(0);
-        illegalCardHand.add(Card.from("B3"));
-        int illegalCardBeforeSize = illegalCardHand.size();
-        boolean illegalCardEndedGame = testController.resolveChosenCard(0, illegalCardHand, "Bot1");
-        if (!illegalCardEndedGame && illegalCardHand.size() == illegalCardBeforeSize + 1 && Main.state.currentPlayer == 1)
+        Main.state.setCurrentPlayer(0);
+        Main.state.setDirection(1);
+        Main.state.setUpCard(Card.from("R9"));
+        Main.state.clearCalledColor();
+        Main.state.clearDeck();
+        Main.state.addToDeck(Card.from("G1"));
+        Main.state.addCardToCurrentPlayer(Card.from("B3"));
+        int illegalCardBeforeSize = Main.state.currentHandSize();
+        boolean illegalCardEndedGame = testController.resolveChosenCard(0, "Bot1");
+        if (!illegalCardEndedGame && Main.state.handSize(0) == illegalCardBeforeSize + 1 && Main.state.currentPlayerIndex() == 1)
             passed++;
         else fail("resolve illegal card penalty and turn loss");
 
