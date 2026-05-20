@@ -1,17 +1,14 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 
 public class GameState {
     private ArrayList<String> playerNames = new ArrayList<String>();
     private ArrayList<Boolean> humanPlayers = new ArrayList<Boolean>();
     private ArrayList<ArrayList<Card>> hands = new ArrayList<ArrayList<Card>>();
-    private ArrayList<Card> deck = new ArrayList<Card>();
-    private ArrayList<Card> discard = new ArrayList<Card>();
+    private CardPiles piles = new CardPiles();
     private int[] scores = new int[10];
     private int currentPlayer = 0;
     private int direction = 1;
-    private Card upCard = Card.from("R0");
     private String calledColor = "";
 
     void clearPlayers() {
@@ -131,35 +128,35 @@ public class GameState {
     }
 
     void clearDeck() {
-        deck.clear();
+        piles.clearDeck();
     }
 
     void addToDeck(Card card) {
-        deck.add(card);
+        piles.addToDeck(card);
     }
 
     void clearDiscard() {
-        discard.clear();
+        piles.clearDiscard();
     }
 
     void discardUpCard() {
-        discard.add(upCard);
+        piles.discardUpCard();
     }
 
     Card upCard() {
-        return upCard;
+        return piles.upCard();
     }
 
     void setUpCard(Card card) {
-        upCard = card;
+        piles.setUpCard(card);
     }
 
     boolean isUpCardWild() {
-        return upCard.isWild();
+        return piles.isUpCardWild();
     }
 
     String upCardCode() {
-        return upCard.code();
+        return piles.upCardCode();
     }
 
     String calledColor() {
@@ -183,37 +180,10 @@ public class GameState {
     }
 
     void buildDeck(Random random) {
-        deck.clear();
-        String[] colors = {"R", "Y", "G", "B"};
-        for (int c = 0; c < colors.length; c++) {
-            deck.add(Card.from(colors[c] + "0"));
-            for (int n = 1; n <= 9; n++) {
-                deck.add(Card.from(colors[c] + n));
-                deck.add(Card.from(colors[c] + n));
-            }
-            deck.add(Card.from(colors[c] + "S"));
-            deck.add(Card.from(colors[c] + "S"));
-            deck.add(Card.from(colors[c] + "R"));
-            deck.add(Card.from(colors[c] + "R"));
-            deck.add(Card.from(colors[c] + "+2"));
-            deck.add(Card.from(colors[c] + "+2"));
-        }
-        for (int i = 0; i < 4; i++) {
-            deck.add(Card.from("W"));
-            deck.add(Card.from("W4"));
-        }
-        Collections.shuffle(deck, random);
+        piles.buildDeck(random);
     }
 
     Card draw(Random random) {
-        if (deck.size() == 0) {
-            deck.addAll(discard);
-            discard.clear();
-            Collections.shuffle(deck, random);
-        }
-        if (deck.size() == 0) {
-            return Card.from("W");
-        }
-        return deck.remove(0);
+        return piles.draw(random);
     }
 }
