@@ -159,6 +159,55 @@ public class CharacterizationTests {
         if (ScoreCalculator.scoreForWinner(Main.state.hands, 0) == 75) passed++;
         else fail("winner score totals other hands");
 
+        Main.setupPlayers(3, false);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = 1;
+        Main.state.upCard = "R9";
+        Main.state.calledColor = "";
+        Main.state.deck.clear();
+        Main.state.deck.add("R4");
+        ArrayList<String> botDrawHand = Main.state.hands.get(0);
+        int autoPlayedDrawnCard = Main.handleDrawIfNeeded(-1, botDrawHand, "Bot1");
+        if (autoPlayedDrawnCard == 0 && botDrawHand.size() == 1 && botDrawHand.get(0).equals("R4")) passed++;
+        else fail("bot auto-selects drawn legal card");
+
+        Main.setupPlayers(3, false);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = 1;
+        Main.state.upCard = "R9";
+        Main.state.calledColor = "";
+        Main.state.deck.clear();
+        Main.state.deck.add("B3");
+        ArrayList<String> botUnplayableDrawHand = Main.state.hands.get(0);
+        int unplayableDrawChoice = Main.handleDrawIfNeeded(-1, botUnplayableDrawHand, "Bot1");
+        if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).equals("B3")) passed++;
+        else fail("bot keeps drawn illegal card without selecting it");
+
+        Main.setupPlayers(3, false);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = 1;
+        Main.state.deck.clear();
+        Main.state.deck.add("R8");
+        ArrayList<String> invalidIndexHand = Main.state.hands.get(0);
+        int invalidIndexBeforeSize = invalidIndexHand.size();
+        boolean invalidIndexEndedGame = Main.resolveChosenCard(5, invalidIndexHand, "Bot1");
+        if (!invalidIndexEndedGame && invalidIndexHand.size() == invalidIndexBeforeSize + 1 && Main.state.currentPlayer == 1) passed++;
+        else fail("resolve invalid index penalty and turn loss");
+
+        Main.setupPlayers(3, false);
+        Main.state.currentPlayer = 0;
+        Main.state.direction = 1;
+        Main.state.upCard = "R9";
+        Main.state.calledColor = "";
+        Main.state.deck.clear();
+        Main.state.deck.add("G1");
+        ArrayList<String> illegalCardHand = Main.state.hands.get(0);
+        illegalCardHand.add("B3");
+        int illegalCardBeforeSize = illegalCardHand.size();
+        boolean illegalCardEndedGame = Main.resolveChosenCard(0, illegalCardHand, "Bot1");
+        if (!illegalCardEndedGame && illegalCardHand.size() == illegalCardBeforeSize + 1 && Main.state.currentPlayer == 1) passed++;
+        else fail("resolve illegal card penalty and turn loss");
+
         System.out.println("Passed " + passed + " characterization checks.");
     }
 
