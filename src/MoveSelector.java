@@ -1,8 +1,7 @@
 import java.util.ArrayList;
 import java.util.Random;
 
-public record MoveSelector(GameState state, Random random, GameView view, boolean quiet) {
-
+public record MoveSelector(GameState state, Random random, GameView view, boolean quiet, PlayerStrategy botStrategy) {
     int chooseMove(String playerName) {
         ArrayList<Card> hand = state.currentHandSnapshot();
 
@@ -10,7 +9,7 @@ public record MoveSelector(GameState state, Random random, GameView view, boolea
         if (state.isCurrentPlayerHuman()) {
             chosen = chooseHumanMove(hand);
         } else {
-            chosen = BotStrategy.chooseCard(hand, state.upCardCode(), state.calledColor());
+            chosen = botStrategy.chooseCard(hand, state.upCardCode(), state.calledColor());
         }
 
         return handleDrawIfNeeded(chosen, playerName);

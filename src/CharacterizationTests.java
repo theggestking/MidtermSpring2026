@@ -66,21 +66,23 @@ public class CharacterizationTests {
     }
 
     private static void testBotStrategy() {
+        BotStrategy strategy = new BotStrategy();
+
         ArrayList<Card> h = new ArrayList<Card>();
         h.add(Card.from("B3"));
         h.add(Card.from("R4"));
         h.add(Card.from("W"));
-        check(BotStrategy.chooseCard(h, "R9", "") == 1, "bot normal before wild");
+        check(strategy.chooseCard(h, "R9", "") == 1, "bot normal before wild");
 
         ArrayList<Card> h2 = new ArrayList<Card>();
         h2.add(Card.from("B1"));
         h2.add(Card.from("B2"));
         h2.add(Card.from("R3"));
-        check(BotStrategy.chooseColor(h2).equals("B"), "bot color");
+        check(strategy.chooseColor(h2).equals("B"), "bot color");
 
         ArrayList<Card> h3 = new ArrayList<Card>();
         h3.add(Card.from("B3"));
-        check(BotStrategy.chooseCard(h3, "R9", "") == -1, "bot has no legal card before drawing");
+        check(strategy.chooseCard(h3, "R9", "") == -1, "bot has no legal card before drawing");
 
         check(CardRules.isLegal("R4", "R9", ""), "drawn bot card can be legal for auto-play");
     }

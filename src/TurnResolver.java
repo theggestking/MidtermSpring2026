@@ -5,12 +5,14 @@ public class TurnResolver {
     private final Random random;
     private final GameView view;
     private final boolean quiet;
+    private final PlayerStrategy botStrategy;
 
-    TurnResolver(GameState state, Random random, GameView view, boolean quiet) {
+    TurnResolver(GameState state, Random random, GameView view, boolean quiet, PlayerStrategy botStrategy) {
         this.state = state;
         this.random = random;
         this.view = view;
         this.quiet = quiet;
+        this.botStrategy = botStrategy;
     }
 
     boolean resolveChosenCard(int chosen, String name) {
@@ -72,7 +74,7 @@ public class TurnResolver {
         if (state.isCurrentPlayerHuman()) {
             state.setCalledColor(view.askColor());
         } else {
-            state.setCalledColor(BotStrategy.chooseColor(state.currentHandSnapshot()));
+            state.setCalledColor(botStrategy.chooseColor(state.currentHandSnapshot()));
         }
 
         if (!quiet) {

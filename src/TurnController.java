@@ -8,14 +8,20 @@ public class TurnController {
     private final boolean quiet;
     private final MoveSelector moveSelector;
     private final TurnResolver turnResolver;
+    private final PlayerStrategy botStrategy;
 
     TurnController(GameState state, Random random, GameView view, boolean quiet) {
+        this(state, random, view, quiet, new BotStrategy());
+    }
+
+    TurnController(GameState state, Random random, GameView view, boolean quiet, PlayerStrategy botStrategy) {
         this.state = state;
         this.random = random;
         this.view = view;
         this.quiet = quiet;
-        this.moveSelector = new MoveSelector(state, random, view, quiet);
-        this.turnResolver = new TurnResolver(state, random, view, quiet);
+        this.botStrategy = botStrategy;
+        this.moveSelector = new MoveSelector(state, random, view, quiet, botStrategy);
+        this.turnResolver = new TurnResolver(state, random, view, quiet, botStrategy);
     }
 
     void playGame() {

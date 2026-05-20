@@ -1,10 +1,7 @@
 import java.util.ArrayList;
 
-public class BotStrategy {
-    private BotStrategy() {
-    }
-
-    static int chooseCard(ArrayList<Card> hand, String upCard, String calledColor) {
+public class BotStrategy implements PlayerStrategy {
+    public int chooseCard(ArrayList<Card> hand, String upCard, String calledColor) {
         int drawTwo = findPlayableCardByRank(hand, CardRank.DRAW_TWO, upCard, calledColor);
         if (drawTwo != -1) {
             return drawTwo;
@@ -29,7 +26,7 @@ public class BotStrategy {
         return -1;
     }
 
-    static int findPlayableCardByRank(ArrayList<Card> hand, CardRank preferredRank, String upCard, String calledColor) {
+    int findPlayableCardByRank(ArrayList<Card> hand, CardRank preferredRank, String upCard, String calledColor) {
         Card up = Card.from(upCard);
         for (int i = 0; i < hand.size(); i++) {
             Card card = hand.get(i);
@@ -40,11 +37,7 @@ public class BotStrategy {
         return -1;
     }
 
-    static int findPlayableCardByRank(ArrayList<Card> hand, String preferredRank, String upCard, String calledColor) {
-        return findPlayableCardByRank(hand, CardRank.valueOf(preferredRank), upCard, calledColor);
-    }
-
-    static String chooseColor(ArrayList<Card> hand) {
+    public String chooseColor(ArrayList<Card> hand) {
         int r = 0;
         int y = 0;
         int g = 0;
