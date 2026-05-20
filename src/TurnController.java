@@ -48,9 +48,44 @@ public class TurnController {
 
     private int chooseMove(ArrayList<Card> hand) {
         if (state.isCurrentPlayerHuman()) {
-            return view.askHuman(hand, state.upCardCode(), state.calledColor());
+            return chooseHumanMove(hand);
         }
         return BotStrategy.chooseCard(hand, state.upCardCode(), state.calledColor());
+    }
+
+    private int chooseHumanMove(ArrayList<Card> hand) {
+        while (true) {
+            String input = view.askMoveInput();
+
+            if (input.equals("DRAW")) {
+                return -1;
+            }
+
+            int index = InputParser.parseCardIndex(input, hand.size());
+            if (index != -1) {
+                return index;
+            }
+
+            int cardIndex = findCardCodeInHand(hand, input);
+            if (cardIndex != -1) {
+                Card card = hand.get(cardIndex);
+                if (CardRules.isLegal(card.code(), state.upCardCode(), state.calledColor())) {
+                    return cardIndex;
+                }
+                view.showIllegalSelection();
+            } else {
+                view.showCardNotFound();
+            }
+        }
+    }
+
+    private int findCardCodeInHand(ArrayList<Card> hand, String cardCode) {
+        for (int i = 0; i < hand.size(); i++) {
+            if (hand.get(i).code().equals(cardCode)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     int handleDrawIfNeeded(int chosen, String name) {

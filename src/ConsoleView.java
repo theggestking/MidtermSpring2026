@@ -24,30 +24,17 @@ public class ConsoleView {
         System.out.println(name + " hand: " + join(hand));
     }
 
-    int askHuman(ArrayList<Card> hand, String upCard, String calledColor) {
-        while (true) {
-            System.out.print("Choose card index/code or draw: ");
-            String input = scanner.nextLine().trim().toUpperCase();
-            if (input.equals("DRAW")) {
-                return -1;
-            }
+    String askMoveInput() {
+        System.out.print("Choose card index/code or draw: ");
+        return scanner.nextLine().trim().toUpperCase();
+    }
 
-            int index = InputParser.parseCardIndex(input, hand.size());
-            if (index != -1) {
-                return index;
-            }
+    void showIllegalSelection() {
+        System.out.println("That card is not legal.");
+    }
 
-            for (int i = 0; i < hand.size(); i++) {
-                if (hand.get(i).code().equals(input)) {
-                    if (CardRules.isLegal(hand.get(i).code(), upCard, calledColor)) {
-                        return i;
-                    }
-                    System.out.println("That card is not legal.");
-                }
-            }
-
-            System.out.println("Card not found.");
-        }
+    void showCardNotFound() {
+        System.out.println("Card not found.");
     }
 
     String askColor() {
