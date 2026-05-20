@@ -95,6 +95,8 @@ public class CharacterizationTests {
         if (CardRules.points("W") == 50) passed++;
         else fail("wild points");
 
+        TurnController testController = new TurnController(Main.state, Main.random, Main.view, true);
+
         Main.state.deck.clear();
         Main.state.discard.clear();
         if (Main.state.draw(Main.random).code().equals("W")) passed++;
@@ -176,7 +178,7 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("R4"));
         ArrayList<Card> botDrawHand = Main.state.hands.get(0);
-        int autoPlayedDrawnCard = Main.handleDrawIfNeeded(-1, botDrawHand, "Bot1");
+        int autoPlayedDrawnCard = testController.handleDrawIfNeeded(-1, botDrawHand, "Bot1");
         if (autoPlayedDrawnCard == 0 && botDrawHand.size() == 1 && botDrawHand.get(0).code().equals("R4")) passed++;
         else fail("bot auto-selects drawn legal card");
 
@@ -188,7 +190,7 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add(Card.from("B3"));
         ArrayList<Card> botUnplayableDrawHand = Main.state.hands.get(0);
-        int unplayableDrawChoice = Main.handleDrawIfNeeded(-1, botUnplayableDrawHand, "Bot1");
+        int unplayableDrawChoice = testController.handleDrawIfNeeded(-1, botUnplayableDrawHand, "Bot1");
         if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).code().equals("B3"))
             passed++;
         else fail("bot keeps drawn illegal card without selecting it");
@@ -200,7 +202,7 @@ public class CharacterizationTests {
         Main.state.deck.add(Card.from("R8"));
         ArrayList<Card> invalidIndexHand = Main.state.hands.get(0);
         int invalidIndexBeforeSize = invalidIndexHand.size();
-        boolean invalidIndexEndedGame = Main.resolveChosenCard(5, invalidIndexHand, "Bot1");
+        boolean invalidIndexEndedGame = testController.resolveChosenCard(5, invalidIndexHand, "Bot1");
         if (!invalidIndexEndedGame && invalidIndexHand.size() == invalidIndexBeforeSize + 1 && Main.state.currentPlayer == 1)
             passed++;
         else fail("resolve invalid index penalty and turn loss");
@@ -215,7 +217,7 @@ public class CharacterizationTests {
         ArrayList<Card> illegalCardHand = Main.state.hands.get(0);
         illegalCardHand.add(Card.from("B3"));
         int illegalCardBeforeSize = illegalCardHand.size();
-        boolean illegalCardEndedGame = Main.resolveChosenCard(0, illegalCardHand, "Bot1");
+        boolean illegalCardEndedGame = testController.resolveChosenCard(0, illegalCardHand, "Bot1");
         if (!illegalCardEndedGame && illegalCardHand.size() == illegalCardBeforeSize + 1 && Main.state.currentPlayer == 1)
             passed++;
         else fail("resolve illegal card penalty and turn loss");
