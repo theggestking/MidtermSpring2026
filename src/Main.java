@@ -117,7 +117,7 @@ public class Main {
             return chosen;
         }
 
-        String drawn = draw();
+        String drawn = state.draw(random);
         hand.add(drawn);
 
         if (!quiet) {
@@ -149,7 +149,7 @@ public class Main {
             if (!quiet) {
                 System.out.println(name + " selected an invalid index and draws a penalty card.");
             }
-            hand.add(draw());
+            hand.add(state.draw(random));
             state.nextPlayer();
             return false;
         }
@@ -161,7 +161,7 @@ public class Main {
             if (!quiet) {
                 System.out.println(name + " tried illegal card " + card + " and draws a penalty card.");
             }
-            hand.add(draw());
+            hand.add(state.draw(random));
             state.nextPlayer();
             return false;
         }
@@ -199,7 +199,7 @@ public class Main {
             return true;
         }
 
-        String effectMessage = ActionEffects.apply(card, state, Main::draw);
+        String effectMessage = ActionEffects.apply(card, state, () -> state.draw(random));
         if (!quiet && !effectMessage.equals("")) {
             System.out.println(effectMessage);
         }
@@ -208,59 +208,24 @@ public class Main {
     }
 
     static void startNewGame() {
-        buildDeck();
+        state.buildDeck(random);
         state.discard.clear();
         for (int i = 0; i < state.hands.size(); i++) {
             state.hands.get(i).clear();
         }
         for (int i = 0; i < state.playerNames.size(); i++) {
             for (int j = 0; j < 7; j++) {
-                state.hands.get(i).add(draw());
+                state.hands.get(i).add(state.draw(random));
             }
         }
-        state.upCard = draw();
+        state.upCard = state.draw(random);
         while (state.upCard.startsWith("W")) {
             state.discard.add(state.upCard);
-            state.upCard = draw();
+            state.upCard = state.draw(random);
         }
         state.calledColor = "";
         state.direction = 1;
         state.currentPlayer = random.nextInt(state.playerNames.size());
-    }
-
-    static void buildDeck() {
-        state.deck.clear();
-        String[] colors = {"R", "Y", "G", "B"};
-        for (int c = 0; c < colors.length; c++) {
-            state.deck.add(colors[c] + "0");
-            for (int n = 1; n <= 9; n++) {
-                state.deck.add(colors[c] + n);
-                state.deck.add(colors[c] + n);
-            }
-            state.deck.add(colors[c] + "S");
-            state.deck.add(colors[c] + "S");
-            state.deck.add(colors[c] + "R");
-            state.deck.add(colors[c] + "R");
-            state.deck.add(colors[c] + "+2");
-            state.deck.add(colors[c] + "+2");
-        }
-        for (int i = 0; i < 4; i++) {
-            state.deck.add("W");
-            state.deck.add("W4");
-        }
-        Collections.shuffle(state.deck, random);
-    }
-
-    static String draw() {
-        if (state.deck.size() == 0) {
-            state.deck.addAll(state.discard);
-            state.discard.clear();
-            Collections.shuffle(state.deck, random);
-        }
-        if (state.deck.size() == 0) {
-            return "W";
-        }
-        return state.deck.remove(0);
     }
 
     static int parseCardIndex(String input, int handSize) {

@@ -88,27 +88,27 @@ public class CharacterizationTests {
 
         Main.state.deck.clear();
         Main.state.discard.clear();
-        if (Main.draw().equals("W")) passed++;
+        if (Main.state.draw(Main.random).equals("W")) passed++;
         else fail("empty deck fallback");
 
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RS", Main.state, Main::draw);
+        ActionEffects.apply("RS", Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.currentPlayer == 2) passed++;
         else fail("skip advances past next player");
 
         Main.setupPlayers(3, false);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RR", Main.state, Main::draw);
+        ActionEffects.apply("RR", Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.direction == -1 && Main.state.currentPlayer == 2) passed++;
         else fail("reverse changes direction");
 
         Main.setupPlayers(1, true);
         Main.state.currentPlayer = 0;
         Main.state.direction = 1;
-        ActionEffects.apply("RR", Main.state, Main::draw);
+        ActionEffects.apply("RR", Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.currentPlayer == 0) passed++;
         else fail("two player reverse acts like skip");
 
@@ -118,7 +118,7 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add("R1");
         Main.state.deck.add("R2");
-        String drawTwoMessage = ActionEffects.apply("R+2", Main.state, Main::draw);
+        String drawTwoMessage = ActionEffects.apply("R+2", Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.hands.get(1).size() == 2 && Main.state.currentPlayer == 2) passed++;
         else fail("draw two gives cards and skips");
         if (drawTwoMessage.equals("Bot2 draws two.")) passed++;
@@ -132,7 +132,7 @@ public class CharacterizationTests {
         Main.state.deck.add("R2");
         Main.state.deck.add("R3");
         Main.state.deck.add("R4");
-        String wildDrawFourMessage = ActionEffects.apply("W4", Main.state, Main::draw);
+        String wildDrawFourMessage = ActionEffects.apply("W4", Main.state, () -> Main.state.draw(Main.random));
         if (Main.state.hands.get(1).size() == 4 && Main.state.currentPlayer == 2) passed++;
         else fail("wild draw four gives cards and skips");
         if (wildDrawFourMessage.equals("Bot2 draws four.")) passed++;
@@ -144,7 +144,7 @@ public class CharacterizationTests {
         Main.state.deck.clear();
         Main.state.deck.add("R8");
         int beforePenaltySize = Main.state.hands.get(0).size();
-        Main.state.hands.get(0).add(Main.draw());
+        Main.state.hands.get(0).add(Main.state.draw(Main.random));
         Main.state.nextPlayer();
         if (Main.state.hands.get(0).size() == beforePenaltySize + 1 && Main.state.currentPlayer == 1) passed++;
         else fail("invalid index penalty draws card and loses turn");
@@ -180,7 +180,8 @@ public class CharacterizationTests {
         Main.state.deck.add("B3");
         ArrayList<String> botUnplayableDrawHand = Main.state.hands.get(0);
         int unplayableDrawChoice = Main.handleDrawIfNeeded(-1, botUnplayableDrawHand, "Bot1");
-        if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).equals("B3")) passed++;
+        if (unplayableDrawChoice == -1 && botUnplayableDrawHand.size() == 1 && botUnplayableDrawHand.get(0).equals("B3"))
+            passed++;
         else fail("bot keeps drawn illegal card without selecting it");
 
         Main.setupPlayers(3, false);
@@ -191,7 +192,8 @@ public class CharacterizationTests {
         ArrayList<String> invalidIndexHand = Main.state.hands.get(0);
         int invalidIndexBeforeSize = invalidIndexHand.size();
         boolean invalidIndexEndedGame = Main.resolveChosenCard(5, invalidIndexHand, "Bot1");
-        if (!invalidIndexEndedGame && invalidIndexHand.size() == invalidIndexBeforeSize + 1 && Main.state.currentPlayer == 1) passed++;
+        if (!invalidIndexEndedGame && invalidIndexHand.size() == invalidIndexBeforeSize + 1 && Main.state.currentPlayer == 1)
+            passed++;
         else fail("resolve invalid index penalty and turn loss");
 
         Main.setupPlayers(3, false);
@@ -205,7 +207,8 @@ public class CharacterizationTests {
         illegalCardHand.add("B3");
         int illegalCardBeforeSize = illegalCardHand.size();
         boolean illegalCardEndedGame = Main.resolveChosenCard(0, illegalCardHand, "Bot1");
-        if (!illegalCardEndedGame && illegalCardHand.size() == illegalCardBeforeSize + 1 && Main.state.currentPlayer == 1) passed++;
+        if (!illegalCardEndedGame && illegalCardHand.size() == illegalCardBeforeSize + 1 && Main.state.currentPlayer == 1)
+            passed++;
         else fail("resolve illegal card penalty and turn loss");
 
         System.out.println("Passed " + passed + " characterization checks.");
