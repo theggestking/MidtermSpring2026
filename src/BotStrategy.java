@@ -30,9 +30,10 @@ public class BotStrategy {
     }
 
     static int findPlayableCardByRank(ArrayList<Card> hand, CardRank preferredRank, String upCard, String calledColor) {
+        Card up = Card.from(upCard);
         for (int i = 0; i < hand.size(); i++) {
             Card card = hand.get(i);
-            if (card.rankValue() == preferredRank && CardRules.isLegal(card, Card.from(upCard), calledColor)) {
+            if (card.rankValue() == preferredRank && CardRules.isLegal(card, up, calledColor)) {
                 return i;
             }
         }
