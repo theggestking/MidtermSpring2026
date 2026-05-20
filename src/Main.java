@@ -78,105 +78,133 @@ public class Main {
         int guard = 0;
         while (guard < 3000) {
             guard++;
-            String name = state.playerNames.get(state.currentPlayer);
-            ArrayList<String> hand = state.hands.get(state.currentPlayer);
-
-            if (!quiet) {
-                System.out.println("\nUp card: " + state.upCard + (state.calledColor.equals("") ? "" : " called " + state.calledColor));
-                System.out.println(name + " hand: " + join(hand));
-            }
-
-            int chosen = -1;
-            if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-                chosen = askHuman(hand);
-            } else {
-                chosen = BotStrategy.chooseCard(hand, state.upCard, state.calledColor);
-            }
-
-            if (chosen == -1) {
-                String drawn = draw();
-                hand.add(drawn);
-                if (!quiet) {
-                    System.out.println(name + " draws " + drawn);
-                }
-                if (CardRules.isLegal(drawn, state.upCard, state.calledColor)) {
-                    if (!state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-                        chosen = hand.size() - 1;
-                    } else {
-                        System.out.print("Play drawn card " + drawn + "? y/n: ");
-                        String answer = scanner.nextLine();
-                        if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
-                            chosen = hand.size() - 1;
-                        }
-                    }
-                }
-            }
-
-            if (chosen >= 0) {
-                if (chosen >= hand.size()) {
-                    if (!quiet) {
-                        System.out.println(name + " selected an invalid index and draws a penalty card.");
-                    }
-                    hand.add(draw());
-                    state.nextPlayer();
-                    continue;
-                }
-
-                String card = hand.get(chosen);
-                boolean ok = CardRules.isLegal(card, state.upCard, state.calledColor);
-
-                if (!ok) {
-                    if (!quiet) {
-                        System.out.println(name + " tried illegal card " + card + " and draws a penalty card.");
-                    }
-                    hand.add(draw());
-                    state.nextPlayer();
-                    continue;
-                }
-
-                hand.remove(chosen);
-                state.discard.add(state.upCard);
-                state.upCard = card;
-                state.calledColor = "";
-                if (!quiet) {
-                    System.out.println(name + " plays " + card);
-                }
-
-                if (card.equals("W") || card.equals("W4")) {
-                    if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
-                        state.calledColor = askColor();
-                    } else {
-                        state.calledColor = BotStrategy.chooseColor(hand);
-                    }
-                    if (!quiet) {
-                        System.out.println(name + " calls " + state.calledColor);
-                    }
-                }
-
-                if (hand.size() == 1 && !quiet) {
-                    System.out.println(name + " says UNO!");
-                }
-
-                if (hand.size() == 0) {
-                    int points = ScoreCalculator.scoreForWinner(state.hands, state.currentPlayer);
-                    state.scores[state.currentPlayer] += points;
-                    if (!quiet) {
-                        System.out.println(name + " wins and scores " + points);
-                    }
-                    return;
-                }
-
-                String effectMessage = ActionEffects.apply(card, state, Main::draw);
-                if (!quiet && !effectMessage.equals("")) {
-                    System.out.println(effectMessage);
-                }
-            } else {
-                state.nextPlayer();
+            if (takeTurn()) {
+                return;
             }
         }
+
         if (!quiet) {
             System.out.println("Game stopped at safety limit.");
         }
+    }
+
+    static boolean takeTurn() {
+        String name = state.playerNames.get(state.currentPlayer);
+        ArrayList<String> hand = state.hands.get(state.currentPlayer);
+
+        renderTurn(name, hand);
+        int chosen = chooseMove(hand);
+        chosen = handleDrawIfNeeded(chosen, hand, name);
+        return resolveChosenCard(chosen, hand, name);
+    }
+
+    static void renderTurn(String name, ArrayList<String> hand) {
+        if (!quiet) {
+            System.out.println("\nUp card: " + state.upCard + (state.calledColor.equals("") ? "" : " called " + state.calledColor));
+            System.out.println(name + " hand: " + join(hand));
+        }
+    }
+
+    static int chooseMove(ArrayList<String> hand) {
+        if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
+            return askHuman(hand);
+        }
+        return BotStrategy.chooseCard(hand, state.upCard, state.calledColor);
+    }
+
+    static int handleDrawIfNeeded(int chosen, ArrayList<String> hand, String name) {
+        if (chosen != -1) {
+            return chosen;
+        }
+
+        String drawn = draw();
+        hand.add(drawn);
+
+        if (!quiet) {
+            System.out.println(name + " draws " + drawn);
+        }
+
+        if (CardRules.isLegal(drawn, state.upCard, state.calledColor)) {
+            if (!state.humanPlayers.get(state.currentPlayer).booleanValue()) {
+                return hand.size() - 1;
+            }
+
+            System.out.print("Play drawn card " + drawn + "? y/n: ");
+            String answer = scanner.nextLine();
+            if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
+                return hand.size() - 1;
+            }
+        }
+
+        return chosen;
+    }
+
+    static boolean resolveChosenCard(int chosen, ArrayList<String> hand, String name) {
+        if (chosen < 0) {
+            state.nextPlayer();
+            return false;
+        }
+
+        if (chosen >= hand.size()) {
+            if (!quiet) {
+                System.out.println(name + " selected an invalid index and draws a penalty card.");
+            }
+            hand.add(draw());
+            state.nextPlayer();
+            return false;
+        }
+
+        String card = hand.get(chosen);
+        boolean ok = CardRules.isLegal(card, state.upCard, state.calledColor);
+
+        if (!ok) {
+            if (!quiet) {
+                System.out.println(name + " tried illegal card " + card + " and draws a penalty card.");
+            }
+            hand.add(draw());
+            state.nextPlayer();
+            return false;
+        }
+
+        hand.remove(chosen);
+        state.discard.add(state.upCard);
+        state.upCard = card;
+        state.calledColor = "";
+
+        if (!quiet) {
+            System.out.println(name + " plays " + card);
+        }
+
+        if (card.equals("W") || card.equals("W4")) {
+            if (state.humanPlayers.get(state.currentPlayer).booleanValue()) {
+                state.calledColor = askColor();
+            } else {
+                state.calledColor = BotStrategy.chooseColor(hand);
+            }
+            if (!quiet) {
+                System.out.println(name + " calls " + state.calledColor);
+            }
+        }
+
+        if (hand.size() == 1 && !quiet) {
+            System.out.println(name + " says UNO!");
+        }
+
+        if (hand.size() == 0) {
+            int points = ScoreCalculator.scoreForWinner(state.hands, state.currentPlayer);
+            state.scores[state.currentPlayer] += points;
+            if (!quiet) {
+                System.out.println(name + " wins and scores " + points);
+            }
+            return true;
+        }
+
+        String effectMessage = ActionEffects.apply(card, state, Main::draw);
+        if (!quiet && !effectMessage.equals("")) {
+            System.out.println(effectMessage);
+        }
+
+        return false;
     }
 
     static void startNewGame() {
