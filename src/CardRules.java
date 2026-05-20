@@ -3,9 +3,10 @@ public class CardRules {
     }
 
     static boolean isLegal(String card, String up, String call) {
-        Card candidate = Card.from(card);
-        Card upCard = Card.from(up);
+        return isLegal(Card.from(card), Card.from(up), call);
+    }
 
+    static boolean isLegal(Card candidate, Card upCard, String call) {
         if (candidate.isWild()) {
             return true;
         }

@@ -29,7 +29,7 @@ public class TurnResolver {
         }
 
         Card card = state.cardInCurrentHand(chosen);
-        boolean ok = CardRules.isLegal(card.code(), state.upCardCode(), state.calledColor());
+        boolean ok = CardRules.isLegal(card, state.upCard(), state.calledColor());
 
         if (!ok) {
             if (!quiet) {

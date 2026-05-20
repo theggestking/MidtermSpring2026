@@ -28,7 +28,7 @@ public record MoveSelector(GameState state, Random random, GameView view, boolea
             view.showDraw(name, drawn.code());
         }
 
-        if (CardRules.isLegal(drawn.code(), state.upCardCode(), state.calledColor())) {
+        if (CardRules.isLegal(drawn, state.upCard(), state.calledColor())) {
             if (!state.isCurrentPlayerHuman()) {
                 return state.currentHandSize() - 1;
             }
@@ -57,7 +57,7 @@ public record MoveSelector(GameState state, Random random, GameView view, boolea
             int cardIndex = findCardCodeInHand(hand, input);
             if (cardIndex != -1) {
                 Card card = hand.get(cardIndex);
-                if (CardRules.isLegal(card.code(), state.upCardCode(), state.calledColor())) {
+                if (CardRules.isLegal(card, state.upCard(), state.calledColor())) {
                     return cardIndex;
                 }
                 view.showIllegalSelection();
