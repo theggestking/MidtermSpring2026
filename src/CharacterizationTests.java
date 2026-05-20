@@ -135,7 +135,7 @@ public class CharacterizationTests {
                 "invalid index penalty draws card and loses turn");
 
         state = threeBotState();
-        TurnController controller = new TurnController(state, TEST_RANDOM, Main.view, true);
+        TurnController controller = new TurnController(state, TEST_RANDOM, new TestGameView(), true);
         state.clearDeck();
         state.addToDeck(Card.from("R8"));
         int invalidIndexBeforeSize = state.currentHandSize();
@@ -144,7 +144,7 @@ public class CharacterizationTests {
                 "resolve invalid index penalty and turn loss");
 
         state = threeBotState();
-        controller = new TurnController(state, TEST_RANDOM, Main.view, true);
+        controller = new TurnController(state, TEST_RANDOM, new TestGameView(), true);
         state.setUpCard(Card.from("R9"));
         state.clearCalledColor();
         state.clearDeck();
@@ -171,7 +171,7 @@ public class CharacterizationTests {
 
     private static void testDrawnCardBehavior() {
         GameState state = threeBotState();
-        TurnController controller = new TurnController(state, TEST_RANDOM, Main.view, true);
+        TurnController controller = new TurnController(state, TEST_RANDOM, new TestGameView(), true);
         state.setUpCard(Card.from("R9"));
         state.clearCalledColor();
         state.clearDeck();
@@ -182,7 +182,7 @@ public class CharacterizationTests {
                 "bot auto-selects drawn legal card");
 
         state = threeBotState();
-        controller = new TurnController(state, TEST_RANDOM, Main.view, true);
+        controller = new TurnController(state, TEST_RANDOM, new TestGameView(), true);
         state.setUpCard(Card.from("R9"));
         state.clearCalledColor();
         state.clearDeck();
@@ -210,6 +210,62 @@ public class CharacterizationTests {
         state.setCurrentPlayer(0);
         state.setDirection(1);
         return state;
+    }
+
+    private static class TestGameView implements GameView {
+        public void showGameHeader(int gameNumber) {
+        }
+
+        public void showFinalScores(GameState state) {
+        }
+
+        public void showTurn(String upCard, String calledColor, String name, java.util.List<Card> hand) {
+        }
+
+        public String askMoveInput() {
+            return "DRAW";
+        }
+
+        public void showIllegalSelection() {
+        }
+
+        public void showCardNotFound() {
+        }
+
+        public String askColor() {
+            return "R";
+        }
+
+        public boolean askPlayDrawnCard(String drawn) {
+            return false;
+        }
+
+        public void showDraw(String name, String drawn) {
+        }
+
+        public void showInvalidIndexPenalty(String name) {
+        }
+
+        public void showIllegalCardPenalty(String name, String card) {
+        }
+
+        public void showPlayedCard(String name, String card) {
+        }
+
+        public void showCalledColor(String name, String calledColor) {
+        }
+
+        public void showUno(String name) {
+        }
+
+        public void showWin(String name, int points) {
+        }
+
+        public void showEffectMessage(String message) {
+        }
+
+        public void showSafetyLimit() {
+        }
     }
 
     private static class TestDrawSupplier implements java.util.function.Supplier<Card> {
