@@ -40,6 +40,15 @@ public class CharacterizationTests {
         if (Main.parseCalledColor("purple").equals("")) passed++;
         else fail("parse invalid called color");
 
+        if (Card.isValid("R5")) passed++;
+        else fail("valid number card accepted");
+        if (Card.isValid("W4")) passed++;
+        else fail("valid wild draw four accepted");
+        if (!Card.isValid("R10")) passed++;
+        else fail("invalid two-digit number rejected");
+        if (!Card.isValid("Q5")) passed++;
+        else fail("invalid color rejected");
+
         ArrayList<String> h = new ArrayList<String>();
         h.add("B3");
         h.add("R4");
