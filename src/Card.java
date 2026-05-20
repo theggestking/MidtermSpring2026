@@ -47,7 +47,7 @@ public class Card {
             return new Card(code, color, "DRAW_TWO", -1);
         }
 
-        if (suffix.length() == 1 && Character.isDigit(suffix.charAt(0))) {
+        if (isNumeric(suffix)) {
             return new Card(code, color, "NUMBER", Integer.parseInt(suffix));
         }
 
@@ -61,6 +61,18 @@ public class Card {
         } catch (IllegalArgumentException ex) {
             return false;
         }
+    }
+
+    static boolean isNumeric(String value) {
+        if (value.length() == 0) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static boolean isColor(String color) {

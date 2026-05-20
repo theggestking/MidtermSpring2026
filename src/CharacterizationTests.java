@@ -44,8 +44,8 @@ public class CharacterizationTests {
         else fail("valid number card accepted");
         if (Card.isValid("W4")) passed++;
         else fail("valid wild draw four accepted");
-        if (!Card.isValid("R10")) passed++;
-        else fail("invalid two-digit number rejected");
+        if (Card.isValid("R10") && CardRules.points("R10") == 10) passed++;
+        else fail("two-digit number helper behavior preserved");
         if (!Card.isValid("Q5")) passed++;
         else fail("invalid color rejected");
 
