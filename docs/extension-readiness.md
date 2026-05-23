@@ -17,7 +17,6 @@ The main files involved would be:
 - a new `SmartBotStrategy`
 - `TurnController`
 - `MoveSelector`
-- `TurnResolver`
 
 The new strategy would choose which card to play and which color to call after a wild. It could reuse `Card`, `CardRank`, `CardColor`, and `CardRules` instead of duplicating card parsing or legality checks.
 
