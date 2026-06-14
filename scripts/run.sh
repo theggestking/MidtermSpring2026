@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 set -eu
 
-scripts/compile.sh
-java -cp out Main "$@"
+mvn --batch-mode package
+exec java -jar target/uno-cli.jar "$@"
 

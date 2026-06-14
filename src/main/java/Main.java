@@ -25,11 +25,8 @@ public class Main {
                 quiet = true;
             } else if (args[i].equals("--seed") && i + 1 < args.length) {
                 seed = Long.parseLong(args[++i]);
-            } else if (args[i].equals("--self-test")) {
-                CharacterizationTests.run();
-                return;
             } else if (args[i].equals("--help")) {
-                System.out.println("Usage: scripts/run.sh [--bots N] [--games N] [--human] [--quiet] [--seed N]");
+                System.out.println("Usage: java -jar target/uno-cli.jar [--bots N] [--games N] [--human] [--quiet] [--seed N]");
                 return;
             }
         }

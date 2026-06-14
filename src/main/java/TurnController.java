@@ -43,7 +43,6 @@ public class TurnController {
     boolean takeTurn() {
         String name = state.currentPlayerName();
         ArrayList<Card> hand = state.currentHandSnapshot();
-
         renderTurn(name, hand);
         int chosen = moveSelector.chooseMove(name);
         return turnResolver.resolveChosenCard(chosen, name);

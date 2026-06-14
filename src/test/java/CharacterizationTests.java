@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.jupiter.api.Test;
+
 public class CharacterizationTests {
     private static int passed = 0;
     private static final Random TEST_RANDOM = new Random(123);
@@ -8,7 +10,8 @@ public class CharacterizationTests {
     private CharacterizationTests() {
     }
 
-    static void run() {
+    @Test
+    void preservesCharacterizedBehavior() {
         passed = 0;
         Main.quiet = true;
 
