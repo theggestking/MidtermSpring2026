@@ -1,3 +1,4 @@
+import java.time.Clock;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -14,6 +15,13 @@ public class Main {
     static GameView view = new ConsoleView(scanner);
 
     public static void main(String[] args) {
+        int exitCode = run(args);
+        if (exitCode != 0) {
+            System.exit(exitCode);
+        }
+    }
+
+    static int run(String[] args) {
         int bots = 3;
         int games = 1;
         boolean human = false;
@@ -32,7 +40,7 @@ public class Main {
                 seed = Long.parseLong(args[++i]);
             } else if (args[i].equals("--help")) {
                 System.out.println("Usage: java -jar target/uno-cli.jar [--bots N] [--games N] [--human] [--quiet] [--seed N]");
-                return;
+                return 0;
             }
         }
 
@@ -42,20 +50,33 @@ public class Main {
         if (state.playerCount() < 2 || state.playerCount() > 4) {
             System.out.println("UNO needs 2 to 4 players.");
             LOGGER.info("event=session_end status=invalid_player_count players={}", state.playerCount());
-            return;
+            return 0;
         }
 
-        TurnController controller = new TurnController(state, random, view, quiet);
-
-        for (int g = 1; g <= games; g++) {
-            if (!quiet) {
-                view.showGameHeader(g);
-            }
-            controller.playGame();
+        Clock clock = Clock.systemUTC();
+        PersistenceBootstrap bootstrap;
+        try {
+            bootstrap = PersistenceBootstrap.open(DatabaseConfig.fromEnvironment());
+        } catch (RuntimeException exception) {
+            System.err.println("Unable to initialize game history: " + conciseMessage(exception));
+            LOGGER.error("event=session_end status=persistence_bootstrap_failed");
+            return 1;
         }
 
-        view.showFinalScores(state);
-        LOGGER.info("event=session_end status=completed games={} players={}", games, state.playerCount());
+        try (bootstrap) {
+            TurnController controller = new TurnController(
+                    state, random, view, quiet, new BotStrategy(), clock);
+            GameSessionController sessionController = new GameSessionController(
+                    state, controller, view, quiet, clock);
+            CompletedGame completedGame = sessionController.play(games);
+            new GameHistoryRepository(bootstrap.entityManagerFactory()).save(completedGame);
+            LOGGER.info("event=session_end status=completed games={} players={}", games, state.playerCount());
+            return 0;
+        } catch (RuntimeException exception) {
+            System.err.println("Unable to save game history: " + conciseMessage(exception));
+            LOGGER.error("event=session_end status=persistence_save_failed");
+            return 1;
+        }
     }
 
     static void setupPlayers(int bots, boolean human) {
@@ -66,5 +87,16 @@ public class Main {
         for (int i = 1; i <= bots; i++) {
             state.addPlayer("Bot" + i, false);
         }
+    }
+
+    private static String conciseMessage(RuntimeException exception) {
+        Throwable cause = exception;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        String message = cause.getMessage();
+        return message == null || message.isBlank()
+                ? cause.getClass().getSimpleName()
+                : message;
     }
 }

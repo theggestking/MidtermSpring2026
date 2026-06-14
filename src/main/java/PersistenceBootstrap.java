@@ -11,6 +11,7 @@ final class PersistenceBootstrap implements AutoCloseable {
     }
 
     static PersistenceBootstrap open(DatabaseConfig config) {
+        config.prepareStorage();
         Flyway.configure()
                 .dataSource(config.url(), config.user(), config.password())
                 .locations("classpath:db/migration")

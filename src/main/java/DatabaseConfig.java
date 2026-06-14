@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +31,28 @@ record DatabaseConfig(String url, String user, String password) {
         properties.put("jakarta.persistence.jdbc.password", password);
         properties.put("jakarta.persistence.jdbc.driver", "org.h2.Driver");
         return properties;
+    }
+
+    void prepareStorage() {
+        String prefix = "jdbc:h2:file:";
+        if (!url.startsWith(prefix)) {
+            return;
+        }
+
+        String databasePath = url.substring(prefix.length()).split(";", 2)[0];
+        if (databasePath.startsWith("~")) {
+            return;
+        }
+
+        Path parent = Path.of(databasePath).toAbsolutePath().getParent();
+        if (parent == null) {
+            return;
+        }
+        try {
+            Files.createDirectories(parent);
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Could not create database directory", exception);
+        }
     }
 
     private static String environmentValue(String name, String fallback) {

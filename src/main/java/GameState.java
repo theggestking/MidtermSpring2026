@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class GameState {
@@ -157,6 +158,10 @@ public class GameState {
 
     void addScoreToPlayer(int player, int points) {
         scoreBoard.addScoreToPlayer(player, points);
+    }
+
+    List<Integer> scoresSnapshot() {
+        return scoreBoard.scoresSnapshot(playerCount());
     }
 
     void buildDeck(Random random) {

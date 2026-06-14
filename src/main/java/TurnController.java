@@ -1,4 +1,7 @@
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -14,29 +17,52 @@ public class TurnController {
     private final MoveSelector moveSelector;
     private final TurnResolver turnResolver;
     private final PlayerStrategy botStrategy;
+    private final Clock clock;
 
     TurnController(GameState state, Random random, GameView view, boolean quiet) {
-        this(state, random, view, quiet, new BotStrategy());
+        this(state, random, view, quiet, new BotStrategy(), Clock.systemUTC());
     }
 
     TurnController(GameState state, Random random, GameView view, boolean quiet, PlayerStrategy botStrategy) {
+        this(state, random, view, quiet, botStrategy, Clock.systemUTC());
+    }
+
+    TurnController(
+            GameState state,
+            Random random,
+            GameView view,
+            boolean quiet,
+            PlayerStrategy botStrategy,
+            Clock clock) {
         this.state = state;
         this.random = random;
         this.view = view;
         this.quiet = quiet;
         this.botStrategy = botStrategy;
+        this.clock = clock;
         this.moveSelector = new MoveSelector(state, random, view, quiet, botStrategy);
         this.turnResolver = new TurnResolver(state, random, view, quiet, botStrategy);
     }
 
     void playGame() {
+        playRound(1);
+    }
+
+    CompletedRound playRound(int roundNumber) {
+        Instant startedAt = clock.instant();
+        List<Integer> scoresBefore = state.scoresSnapshot();
         startNewGame();
 
         int guard = 0;
         while (guard < 3000) {
             guard++;
             if (takeTurn()) {
-                return;
+                return completedRound(
+                        roundNumber,
+                        startedAt,
+                        RoundStatus.COMPLETED,
+                        state.currentPlayerName(),
+                        scoresBefore);
             }
         }
 
@@ -44,6 +70,7 @@ public class TurnController {
             view.showSafetyLimit();
         }
         LOGGER.warn("event=game_end result=safety_limit turns={}", guard);
+        return completedRound(roundNumber, startedAt, RoundStatus.SAFETY_LIMIT, null, scoresBefore);
     }
 
     boolean takeTurn() {
@@ -92,5 +119,33 @@ public class TurnController {
         state.chooseRandomCurrentPlayer(random);
         LOGGER.info("event=game_start players={} starting_player={} up_card={}",
                 state.playerCount(), state.currentPlayerName(), state.upCardCode());
+    }
+
+    private CompletedRound completedRound(
+            int roundNumber,
+            Instant startedAt,
+            RoundStatus status,
+            String winnerName,
+            List<Integer> scoresBefore) {
+        List<Integer> scoresAfter = state.scoresSnapshot();
+        List<RoundPlayerScore> playerScores = new ArrayList<>(state.playerCount());
+        int awardedPoints = 0;
+        for (int player = 0; player < state.playerCount(); player++) {
+            int scoreBefore = scoresBefore.get(player);
+            int scoreAfter = scoresAfter.get(player);
+            int scoreDelta = scoreAfter - scoreBefore;
+            playerScores.add(new RoundPlayerScore(
+                    state.playerName(player), scoreBefore, scoreDelta, scoreAfter));
+            awardedPoints = Math.max(awardedPoints, scoreDelta);
+        }
+
+        return new CompletedRound(
+                roundNumber,
+                startedAt,
+                clock.instant(),
+                status,
+                winnerName,
+                awardedPoints,
+                playerScores);
     }
 }
