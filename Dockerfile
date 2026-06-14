@@ -10,7 +10,9 @@ RUN mvn --batch-mode clean package
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
+RUN mkdir -p /app/data
 COPY --from=builder /app/target/uno-cli.jar /app/uno-cli.jar
 
+VOLUME ["/app/data"]
 ENTRYPOINT ["java", "-jar", "/app/uno-cli.jar"]
 CMD ["--bots", "3", "--games", "1", "--quiet"]

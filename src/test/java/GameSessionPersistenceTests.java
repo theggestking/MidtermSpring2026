@@ -77,6 +77,33 @@ class GameSessionPersistenceTests {
         assertTrue(game.finalScores().stream().allMatch(FinalPlayerScore::winner));
     }
 
+    @Test
+    void allSafetyLimitRoundsHaveNoFinalWinner() {
+        GameState state = new GameState();
+        state.addPlayer("Bot1", false);
+        state.addPlayer("Bot2", false);
+        CompletedRound safetyLimit = new CompletedRound(
+                1,
+                Instant.EPOCH,
+                Instant.EPOCH,
+                RoundStatus.SAFETY_LIMIT,
+                null,
+                0,
+                List.of(
+                        new RoundPlayerScore("Bot1", 0, 0, 0),
+                        new RoundPlayerScore("Bot2", 0, 0, 0)));
+
+        GameSessionController controller = new GameSessionController(
+                state,
+                new StubTurnController(state, safetyLimit),
+                new NoOpView(),
+                true,
+                Clock.fixed(Instant.EPOCH, ZoneOffset.UTC));
+        CompletedGame game = controller.play(1);
+
+        assertTrue(game.finalScores().stream().noneMatch(FinalPlayerScore::winner));
+    }
+
     private static final class StubTurnController extends TurnController {
         private final CompletedRound round;
 
