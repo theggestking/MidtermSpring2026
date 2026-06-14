@@ -45,4 +45,28 @@ class GamePlayerEntity {
     void setGame(GameEntity game) {
         this.game = game;
     }
+
+    Long id() {
+        return id;
+    }
+
+    GameEntity game() {
+        return game;
+    }
+
+    PlayerEntity player() {
+        return player;
+    }
+
+    int seatNumber() {
+        return seatNumber;
+    }
+
+    int finalScore() {
+        return finalScore;
+    }
+
+    boolean winner() {
+        return winner;
+    }
 }

@@ -62,4 +62,28 @@ class GameEntity {
     Long id() {
         return id;
     }
+
+    Instant startedAt() {
+        return startedAt;
+    }
+
+    Instant completedAt() {
+        return completedAt;
+    }
+
+    int requestedRounds() {
+        return requestedRounds;
+    }
+
+    int completedRounds() {
+        return completedRounds;
+    }
+
+    List<GamePlayerEntity> players() {
+        return players;
+    }
+
+    List<RoundEntity> rounds() {
+        return rounds;
+    }
 }

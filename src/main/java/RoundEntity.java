@@ -70,4 +70,36 @@ class RoundEntity {
         scores.add(score);
         score.setRound(this);
     }
+
+    Long id() {
+        return id;
+    }
+
+    int roundNumber() {
+        return roundNumber;
+    }
+
+    Instant startedAt() {
+        return startedAt;
+    }
+
+    Instant completedAt() {
+        return completedAt;
+    }
+
+    String status() {
+        return status;
+    }
+
+    PlayerEntity winner() {
+        return winner;
+    }
+
+    int awardedPoints() {
+        return awardedPoints;
+    }
+
+    List<RoundScoreEntity> scores() {
+        return scores;
+    }
 }

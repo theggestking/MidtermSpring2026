@@ -45,4 +45,20 @@ class RoundScoreEntity {
     void setRound(RoundEntity round) {
         this.round = round;
     }
+
+    PlayerEntity player() {
+        return player;
+    }
+
+    int scoreBefore() {
+        return scoreBefore;
+    }
+
+    int scoreDelta() {
+        return scoreDelta;
+    }
+
+    int scoreAfter() {
+        return scoreAfter;
+    }
 }
