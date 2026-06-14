@@ -1,0 +1,7 @@
+enum CliMode {
+    GAMEPLAY,
+    RECENT_GAMES,
+    PLAYER_WINS,
+    HIGHEST_SCORES,
+    HELP
+}

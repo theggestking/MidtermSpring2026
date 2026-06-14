@@ -22,38 +22,19 @@ public class Main {
     }
 
     static int run(String[] args) {
-        int bots = 3;
-        int games = 1;
-        boolean human = false;
-        long seed = System.currentTimeMillis();
-
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("--bots") && i + 1 < args.length) {
-                bots = Integer.parseInt(args[++i]);
-            } else if (args[i].equals("--games") && i + 1 < args.length) {
-                games = Integer.parseInt(args[++i]);
-            } else if (args[i].equals("--human")) {
-                human = true;
-            } else if (args[i].equals("--quiet")) {
-                quiet = true;
-            } else if (args[i].equals("--seed") && i + 1 < args.length) {
-                seed = Long.parseLong(args[++i]);
-            } else if (args[i].equals("--help")) {
-                System.out.println("Usage: java -jar target/uno-cli.jar [--bots N] [--games N] [--human] [--quiet] [--seed N]");
-                return 0;
-            }
+        CliOptions options;
+        try {
+            options = CliOptions.parse(args);
+        } catch (IllegalArgumentException exception) {
+            System.err.println("Argument error: " + exception.getMessage());
+            System.err.println(CliOptions.usage());
+            return 2;
         }
-
-        random = new Random(seed);
-        setupPlayers(bots, human);
-
-        if (state.playerCount() < 2 || state.playerCount() > 4) {
-            System.out.println("UNO needs 2 to 4 players.");
-            LOGGER.info("event=session_end status=invalid_player_count players={}", state.playerCount());
+        if (options.mode() == CliMode.HELP) {
+            System.out.println(CliOptions.usage());
             return 0;
         }
 
-        Clock clock = Clock.systemUTC();
         PersistenceBootstrap bootstrap;
         try {
             bootstrap = PersistenceBootstrap.open(DatabaseConfig.fromEnvironment());
@@ -64,19 +45,41 @@ public class Main {
         }
 
         try (bootstrap) {
-            TurnController controller = new TurnController(
-                    state, random, view, quiet, new BotStrategy(), clock);
-            GameSessionController sessionController = new GameSessionController(
-                    state, controller, view, quiet, clock);
-            CompletedGame completedGame = sessionController.play(games);
-            new GameHistoryRepository(bootstrap.entityManagerFactory()).save(completedGame);
-            LOGGER.info("event=session_end status=completed games={} players={}", games, state.playerCount());
-            return 0;
+            GameHistoryRepository repository = new GameHistoryRepository(bootstrap.entityManagerFactory());
+            if (options.mode() != CliMode.GAMEPLAY) {
+                new GameHistoryReportController(repository, new HistoryReportView(System.out)).show(options);
+                return 0;
+            }
+            return playAndPersist(options, repository);
         } catch (RuntimeException exception) {
-            System.err.println("Unable to save game history: " + conciseMessage(exception));
-            LOGGER.error("event=session_end status=persistence_save_failed");
+            System.err.println("Unable to use game history: " + conciseMessage(exception));
+            LOGGER.error("event=session_end status=persistence_operation_failed");
             return 1;
         }
+    }
+
+    private static int playAndPersist(CliOptions options, GameHistoryRepository repository) {
+        state = new GameState();
+        quiet = options.quiet();
+        random = new Random(options.seed());
+        setupPlayers(options.bots(), options.human());
+
+        if (state.playerCount() < 2 || state.playerCount() > 4) {
+            System.out.println("UNO needs 2 to 4 players.");
+            LOGGER.info("event=session_end status=invalid_player_count players={}", state.playerCount());
+            return 0;
+        }
+
+        Clock clock = Clock.systemUTC();
+        TurnController controller = new TurnController(
+                state, random, view, quiet, new BotStrategy(), clock);
+        GameSessionController sessionController = new GameSessionController(
+                state, controller, view, quiet, clock);
+        CompletedGame completedGame = sessionController.play(options.games());
+        repository.save(completedGame);
+        LOGGER.info("event=session_end status=completed games={} players={}",
+                options.games(), state.playerCount());
+        return 0;
     }
 
     static void setupPlayers(int bots, boolean human) {
