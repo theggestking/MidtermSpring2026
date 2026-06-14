@@ -1,7 +1,12 @@
 import java.util.Random;
 import java.util.Scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Main {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
     static GameState state = new GameState();
     static boolean quiet = false;
     static Random random = new Random();
@@ -36,6 +41,7 @@ public class Main {
 
         if (state.playerCount() < 2 || state.playerCount() > 4) {
             System.out.println("UNO needs 2 to 4 players.");
+            LOGGER.info("event=session_end status=invalid_player_count players={}", state.playerCount());
             return;
         }
 
@@ -49,6 +55,7 @@ public class Main {
         }
 
         view.showFinalScores(state);
+        LOGGER.info("event=session_end status=completed games={} players={}", games, state.playerCount());
     }
 
     static void setupPlayers(int bots, boolean human) {

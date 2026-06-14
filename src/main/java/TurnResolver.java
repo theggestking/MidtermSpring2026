@@ -1,6 +1,11 @@
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TurnResolver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TurnResolver.class);
+
     private final GameState state;
     private final Random random;
     private final GameView view;
@@ -22,10 +27,13 @@ public class TurnResolver {
         }
 
         if (chosen >= state.currentHandSize()) {
+            Card penalty = state.draw(random);
             if (!quiet) {
                 view.showInvalidIndexPenalty(name);
             }
-            state.addCardToCurrentPlayer(state.draw(random));
+            LOGGER.warn("event=invalid_input player={} input={} reason=index_out_of_range", name, chosen);
+            LOGGER.info("event=card_drawn player={} card={} reason=invalid_index_penalty", name, penalty.code());
+            state.addCardToCurrentPlayer(penalty);
             state.nextPlayer();
             return false;
         }
@@ -34,10 +42,13 @@ public class TurnResolver {
         boolean ok = CardRules.isLegal(card, state.upCard(), state.calledColor());
 
         if (!ok) {
+            Card penalty = state.draw(random);
             if (!quiet) {
                 view.showIllegalCardPenalty(name, card.code());
             }
-            state.addCardToCurrentPlayer(state.draw(random));
+            LOGGER.warn("event=invalid_input player={} input={} reason=illegal_card", name, card.code());
+            LOGGER.info("event=card_drawn player={} card={} reason=illegal_card_penalty", name, penalty.code());
+            state.addCardToCurrentPlayer(penalty);
             state.nextPlayer();
             return false;
         }
@@ -46,6 +57,8 @@ public class TurnResolver {
         state.discardUpCard();
         state.setUpCard(card);
         state.clearCalledColor();
+        LOGGER.info("event=card_played player={} card={} cards_remaining={}",
+                name, card.code(), state.currentHandSize());
 
         if (!quiet) {
             view.showPlayedCard(name, card.code());
@@ -85,6 +98,7 @@ public class TurnResolver {
     private void scoreWin(String name) {
         int points = ScoreCalculator.scoreForWinner(state.handsSnapshot(), state.currentPlayerIndex());
         state.addScoreToPlayer(state.currentPlayerIndex(), points);
+        LOGGER.info("event=game_end winner={} points={}", name, points);
 
         if (!quiet) {
             view.showWin(name, points);

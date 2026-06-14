@@ -1,7 +1,12 @@
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TurnController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TurnController.class);
+
     private final GameState state;
     private final Random random;
     private final GameView view;
@@ -38,11 +43,14 @@ public class TurnController {
         if (!quiet) {
             view.showSafetyLimit();
         }
+        LOGGER.warn("event=game_end result=safety_limit turns={}", guard);
     }
 
     boolean takeTurn() {
         String name = state.currentPlayerName();
         ArrayList<Card> hand = state.currentHandSnapshot();
+        LOGGER.info("event=player_turn player={} hand_size={} up_card={}",
+                name, hand.size(), state.upCardCode());
         renderTurn(name, hand);
         int chosen = moveSelector.chooseMove(name);
         return turnResolver.resolveChosenCard(chosen, name);
@@ -82,5 +90,7 @@ public class TurnController {
         state.clearCalledColor();
         state.resetDirection();
         state.chooseRandomCurrentPlayer(random);
+        LOGGER.info("event=game_start players={} starting_player={} up_card={}",
+                state.playerCount(), state.currentPlayerName(), state.upCardCode());
     }
 }
