@@ -44,7 +44,7 @@ The packaged application is written to `target/uno-cli.jar`.
 Run through Maven:
 
 ```powershell
-mvn exec:java -Dexec.args="--bots 3 --games 5 --quiet"
+mvn exec:java '-Dexec.args=--bots 3 --games 5 --quiet'
 ```
 
 Run the packaged JAR:
