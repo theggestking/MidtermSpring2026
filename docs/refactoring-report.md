@@ -45,13 +45,13 @@ The characterization checks cover:
 - card parsing,
 - and empty deck fallback behavior.
 
-The checks are runnable with:
+The checks are runnable through Maven with:
 
 ```sh
-scripts/test.sh
+mvn test
 ```
 
-At the end of the refactor, the suite contains 53 characterization checks.
+The suite preserves all 53 characterization checks from the midterm.
 
 ## Incremental Refactoring Steps
 
@@ -153,9 +153,9 @@ The following behaviors were intentionally preserved because they are part of th
 After refactoring steps, I repeatedly ran:
 
 ```sh
-scripts/compile.sh
-scripts/test.sh
-scripts/run.sh --bots 3 --games 5 --quiet --seed 123
+mvn clean compile
+mvn test
+mvn exec:java -Dexec.args="--bots 3 --games 5 --quiet --seed 123"
 ```
 
 The final characterization test output is:
@@ -181,11 +181,11 @@ The refactor intentionally avoids a full rewrite, so some limitations remain.
 
 Action effects are centralized, but they are currently implemented through `CardRank` and `ActionEffects`, which means action cards still mutate `GameState` directly. This is acceptable for the current project size, but more complex rule variants may require a separate rule/effect abstraction later.
 
-The tests use the project’s custom self-test runner instead of a standard framework such as JUnit. This keeps the project simple and compatible with the provided scripts, but failure reporting is less detailed than a normal unit test framework.
+The original custom checks now run through JUnit and Maven while preserving all 53 assertions. Maven provides standard test discovery and failure reporting without manual classpath setup.
 
 The parser accepts some card strings that the deck does not normally generate, such as `R10`. This preserves helper behavior during refactoring, but the actual deck still only creates number cards from 0 through 9.
 
-Some classes and methods remain package-private because the project uses a simple single-package structure. I did not add Java packages because that would require changing the compile script and would add unnecessary risk late in the refactor.
+Some classes and methods remain package-private because the project uses a simple single-package structure. Maven now supplies the standard `src/main/java` and `src/test/java` layout without forcing an unrelated package redesign.
 
 ## Summary
 

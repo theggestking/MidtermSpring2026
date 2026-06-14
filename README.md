@@ -1,26 +1,76 @@
-# Midterm UNO CLI
+# UNO CLI
 
-This is a standalone CLI UNO-like game.
+This command-line UNO-like game uses Maven for compilation, testing,
+packaging, and execution. It also includes structured diagnostic logging and a
+Docker image.
 
-The code is written as plausible feature-grown Java: almost everything lives in one procedural `Main` class. It works, but it has mixed responsibilities, duplicated rule logic, primitive-heavy card handling, global state, and condition-heavy gameplay code. The goal is to refactor it safely, not rewrite it.
+## Requirements
 
-## Compile
+- Java 21 or newer
+- Maven 3.9 or newer
+- Docker Desktop or another Docker engine for container commands
+- WSL 2 enabled when using Docker Desktop with Linux containers on Windows
 
-```bash
-scripts/compile.sh
+The project compiles with the Java 21 release target. It does not require an
+IDE or manual classpath configuration.
+
+## Build And Test
+
+Compile the production code:
+
+```powershell
+mvn clean compile
 ```
 
-## Run Bot Games
+Run all tests:
 
-```bash
-scripts/run.sh --bots 3 --games 5 --quiet
+```powershell
+mvn test
 ```
 
-## Run Interactive Game
+The Maven test lifecycle runs the 53 preserved characterization assertions and
+the logging tests.
 
-```bash
-scripts/run.sh --human --bots 2 --games 1
+Create the self-contained executable JAR:
+
+```powershell
+mvn clean package
 ```
+
+The packaged application is written to `target/uno-cli.jar`.
+
+## Run Locally
+
+Run through Maven:
+
+```powershell
+mvn exec:java -Dexec.args="--bots 3 --games 5 --quiet"
+```
+
+Run the packaged JAR:
+
+```powershell
+java -jar target/uno-cli.jar --bots 3 --games 5 --quiet
+```
+
+Run an interactive game:
+
+```powershell
+java -jar target/uno-cli.jar --human --bots 2 --games 1
+```
+
+Supported arguments:
+
+| Argument | Meaning |
+| --- | --- |
+| `--bots N` | Add `N` bot players |
+| `--games N` | Play `N` games |
+| `--human` | Add one human player |
+| `--quiet` | Hide turn-by-turn player output |
+| `--seed N` | Use a deterministic random seed |
+| `--help` | Print command usage |
+
+UNO needs a total of two to four players.
 
 Card input examples:
 
@@ -34,38 +84,58 @@ W4   wild draw four
 draw draw a card
 ```
 
-## Characterization Checks
+## Logging
 
-```bash
-scripts/test.sh
+Player-facing CLI output is written to stdout. SLF4J and Logback write
+diagnostic events at INFO level or higher to stderr. Logged events include game
+starts, player turns, played and drawn cards, invalid input, game endings, and
+session endings. Logs do not include complete player hands or machine-specific
+paths.
+
+## Docker
+
+Build the image entirely from repository contents:
+
+```powershell
+docker build -t uno-cli .
 ```
 
-## Submission
+Start the finite default bot game:
 
-Submit your work through GitHub:
+```powershell
+docker run --rm uno-cli
+```
 
-1. Fork this repository to your GitHub account.
-2. Clone your fork locally.
-3. Complete the midterm work in your fork.
-4. Commit your changes with clear commit messages.
-5. Push your branch to GitHub.
-6. Open a pull request from your fork back to the original repository.
+Override the default arguments:
 
-Your pull request must include:
+```powershell
+docker run --rm uno-cli --bots 3 --games 5 --quiet --seed 123
+```
 
-* refactored source code
-* characterization tests
-* `docs/refactoring-report.md`
-* `docs/extension-readiness.md`
+Run interactively:
 
-Do not submit a zip file instead of a pull request unless the instructor explicitly asks for it.
+```powershell
+docker run --rm -it uno-cli --human --bots 2 --games 1
+```
 
-## Rules
+The Docker builder supplies Maven and Java 21. The runtime image contains Java
+21 and the self-contained `uno-cli.jar`; it does not depend on files outside
+this repository.
 
-See `docs/rules.html` for the implemented game rules.
+## Optional Shell Scripts
 
-## Midterm Materials
+On systems with a POSIX shell, the legacy shortcuts now delegate to Maven:
 
-* `docs/midterm-exam.md`: midterm brief
-* `docs/rubric.md`: grading rubric
-* `docs/refactoring-guide.md`: suggested refactoring path
+```sh
+scripts/compile.sh
+scripts/test.sh
+scripts/run.sh --bots 3 --games 5 --quiet
+```
+
+Maven commands above are the primary cross-platform workflow.
+
+## Project Documentation
+
+- `docs/rules.html`: implemented game rules
+- `docs/refactoring-report.md`: midterm refactoring report
+- `docs/extension-readiness.md`: extension readiness analysis
