@@ -27,7 +27,14 @@ public interface GameView {
 
     void showCalledColor(String name, String calledColor);
 
+    default boolean askCallUno() {
+        return true;
+    }
+
     void showUno(String name);
+
+    default void showMissedUnoPenalty(String name) {
+    }
 
     void showWin(String name, int points);
 

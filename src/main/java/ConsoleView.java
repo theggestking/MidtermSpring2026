@@ -83,8 +83,20 @@ public record ConsoleView(Scanner scanner) implements GameView {
     }
 
     @Override
+    public boolean askCallUno() {
+        System.out.print("Call UNO? y/n: ");
+        String answer = scanner.nextLine();
+        return answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes");
+    }
+
+    @Override
     public void showUno(String name) {
         System.out.println(name + " says UNO!");
+    }
+
+    @Override
+    public void showMissedUnoPenalty(String name) {
+        System.out.println(name + " missed UNO and draws two penalty cards.");
     }
 
     @Override

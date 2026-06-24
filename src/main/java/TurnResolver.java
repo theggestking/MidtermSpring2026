@@ -66,9 +66,7 @@ public class TurnResolver {
 
         callColorIfWild(card, name);
 
-        if (state.currentHandSize() == 1 && !quiet) {
-            view.showUno(name);
-        }
+        handleUnoCall(name);
 
         if (state.currentHandSize() == 0) {
             scoreWin(name);
@@ -77,6 +75,38 @@ public class TurnResolver {
 
         applyCardEffect(card);
         return false;
+    }
+
+    private void handleUnoCall(String name) {
+        if (state.currentHandSize() != 1) {
+            return;
+        }
+
+        if (!state.isCurrentPlayerHuman()) {
+            LOGGER.info("event=uno_called player={}", name);
+            if (!quiet) {
+                view.showUno(name);
+            }
+            return;
+        }
+
+        if (view.askCallUno()) {
+            LOGGER.info("event=uno_called player={}", name);
+            if (!quiet) {
+                view.showUno(name);
+            }
+            return;
+        }
+
+        LOGGER.warn("event=uno_penalty player={} reason=missed_uno", name);
+        for (int penaltyCard = 0; penaltyCard < 2; penaltyCard++) {
+            Card drawn = state.draw(random);
+            state.addCardToCurrentPlayer(drawn);
+            LOGGER.info("event=card_drawn player={} card={} reason=missed_uno_penalty", name, drawn.code());
+        }
+        if (!quiet) {
+            view.showMissedUnoPenalty(name);
+        }
     }
 
     private void callColorIfWild(Card card, String name) {
