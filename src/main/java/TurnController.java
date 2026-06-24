@@ -109,9 +109,11 @@ public class TurnController {
         }
 
         state.setUpCard(state.draw(random));
-        while (state.isUpCardWild()) {
+        int redraws = 0;
+        while (state.upCard().rankValue() != CardRank.NUMBER && redraws < 108) {
             state.discardUpCard();
             state.setUpCard(state.draw(random));
+            redraws++;
         }
 
         state.clearCalledColor();
