@@ -12,6 +12,11 @@ public class BotStrategy implements PlayerStrategy {
             return skip;
         }
 
+        int reverse = findPlayableCardByRank(hand, CardRank.REVERSE, upCard, calledColor);
+        if (reverse != -1) {
+            return reverse;
+        }
+
         int number = findPlayableCardByRank(hand, CardRank.NUMBER, upCard, calledColor);
         if (number != -1) {
             return number;

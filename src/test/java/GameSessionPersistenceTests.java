@@ -26,10 +26,10 @@ class GameSessionPersistenceTests {
         CompletedGame game = sessionController.play(5);
 
         assertEquals(5, game.rounds().size());
-        assertEquals(List.of(138, 246, 98), game.finalScores().stream()
+        assertEquals(List.of(156, 133, 17), game.finalScores().stream()
                 .map(FinalPlayerScore::finalScore)
                 .toList());
-        assertEquals(List.of("Bot2"), game.finalScores().stream()
+        assertEquals(List.of("Bot1"), game.finalScores().stream()
                 .filter(FinalPlayerScore::winner)
                 .map(FinalPlayerScore::playerName)
                 .toList());
@@ -40,10 +40,10 @@ class GameSessionPersistenceTests {
 
             RecentGameReport saved = repository.recentGames(1).getFirst();
             assertEquals(5, saved.completedRounds());
-            assertEquals(List.of(138, 246, 98), saved.finalScores().stream()
+            assertEquals(List.of(156, 133, 17), saved.finalScores().stream()
                     .map(FinalPlayerScore::finalScore)
                     .toList());
-            assertEquals(1L, repository.playerWinCount("bot2"));
+            assertEquals(1L, repository.playerWinCount("bot1"));
             assertFalse(repository.highestScores(3).isEmpty());
         }
     }
