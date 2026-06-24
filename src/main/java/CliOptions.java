@@ -5,6 +5,7 @@ record CliOptions(
         boolean human,
         boolean quiet,
         long seed,
+        int targetScore,
         int reportLimit,
         String playerName) {
 
@@ -20,9 +21,12 @@ record CliOptions(
         boolean human = false;
         boolean quiet = false;
         long seed = defaultSeed;
+        int targetScore = 0;
         CliMode mode = CliMode.GAMEPLAY;
         int reportLimit = DEFAULT_REPORT_LIMIT;
         String playerName = null;
+        boolean gamesArgumentSeen = false;
+        boolean targetScoreArgumentSeen = false;
         boolean gameplayArgumentSeen = false;
         boolean reportArgumentSeen = false;
 
@@ -35,6 +39,7 @@ record CliOptions(
                 }
                 case "--games" -> {
                     games = parseInteger(requiredValue(args, ++index, argument), argument);
+                    gamesArgumentSeen = true;
                     gameplayArgumentSeen = true;
                 }
                 case "--human" -> {
@@ -47,6 +52,11 @@ record CliOptions(
                 }
                 case "--seed" -> {
                     seed = parseLong(requiredValue(args, ++index, argument), argument);
+                    gameplayArgumentSeen = true;
+                }
+                case "--target-score" -> {
+                    targetScore = parseInteger(requiredValue(args, ++index, argument), argument);
+                    targetScoreArgumentSeen = true;
                     gameplayArgumentSeen = true;
                 }
                 case "--recent-games" -> {
@@ -87,22 +97,32 @@ record CliOptions(
         if (mode == CliMode.GAMEPLAY && games < 1) {
             throw new IllegalArgumentException("--games must be at least 1");
         }
+        if (targetScoreArgumentSeen && targetScore < 1) {
+            throw new IllegalArgumentException("--target-score must be at least 1");
+        }
+        if (targetScore > 0 && gamesArgumentSeen) {
+            throw new IllegalArgumentException("--target-score cannot be combined with --games");
+        }
         if (mode == CliMode.RECENT_GAMES || mode == CliMode.HIGHEST_SCORES) {
             validateReportLimit(reportLimit);
         }
 
         return new CliOptions(
-                mode, bots, games, human, quiet, seed, reportLimit, playerName);
+                mode, bots, games, human, quiet, seed, targetScore, reportLimit, playerName);
     }
 
     static String usage() {
         return """
                 Usage:
-                  java -jar target/uno-cli.jar [--bots N] [--games N] [--human] [--quiet] [--seed N]
+                  java -jar target/uno-cli.jar [--bots N] [--games N | --target-score N] [--human] [--quiet] [--seed N]
                   java -jar target/uno-cli.jar --recent-games [1-100]
                   java -jar target/uno-cli.jar --player-wins NAME
                   java -jar target/uno-cli.jar --highest-scores [1-100]
                 """.stripTrailing();
+    }
+
+    boolean usesTargetScore() {
+        return targetScore > 0;
     }
 
     private static String requiredValue(String[] args, int index, String argument) {

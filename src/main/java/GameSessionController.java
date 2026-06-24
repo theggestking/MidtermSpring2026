@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class GameSessionController {
+    static final int MAX_TARGET_SCORE_ROUNDS = 100;
+
     private final GameState state;
     private final TurnController turnController;
     private final GameView view;
@@ -46,6 +48,31 @@ final class GameSessionController {
                 finalScores(rounds));
     }
 
+    CompletedGame playToTargetScore(int targetScore) {
+        if (targetScore < 1) {
+            throw new IllegalArgumentException("Target score must be at least 1");
+        }
+
+        Instant startedAt = clock.instant();
+        List<CompletedRound> rounds = new ArrayList<>();
+        for (int roundNumber = 1;
+                roundNumber <= MAX_TARGET_SCORE_ROUNDS && highestScore() < targetScore;
+                roundNumber++) {
+            if (!quiet) {
+                view.showGameHeader(roundNumber);
+            }
+            rounds.add(turnController.playRound(roundNumber));
+        }
+
+        view.showFinalScores(state);
+        return new CompletedGame(
+                startedAt,
+                clock.instant(),
+                rounds.size(),
+                rounds,
+                finalScores(rounds));
+    }
+
     private List<FinalPlayerScore> finalScores(List<CompletedRound> rounds) {
         boolean hasCompletedRound = rounds.stream()
                 .anyMatch(round -> round.status() == RoundStatus.COMPLETED);
@@ -64,5 +91,12 @@ final class GameSessionController {
                     hasCompletedRound && score == highestScore));
         }
         return List.copyOf(scores);
+    }
+
+    private int highestScore() {
+        return state.scoresSnapshot().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
     }
 }

@@ -75,10 +75,12 @@ public class Main {
                 state, random, view, quiet, new BotStrategy(), clock);
         GameSessionController sessionController = new GameSessionController(
                 state, controller, view, quiet, clock);
-        CompletedGame completedGame = sessionController.play(options.games());
+        CompletedGame completedGame = options.usesTargetScore()
+                ? sessionController.playToTargetScore(options.targetScore())
+                : sessionController.play(options.games());
         repository.save(completedGame);
         LOGGER.info("event=session_end status=completed games={} players={}",
-                options.games(), state.playerCount());
+                completedGame.completedRounds(), state.playerCount());
         return 0;
     }
 
