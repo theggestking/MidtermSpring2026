@@ -136,7 +136,9 @@ public class TurnResolver {
     }
 
     private void applyCardEffect(Card card) {
-        String effectMessage = ActionEffects.apply(card, state, () -> state.draw(random));
+        String effectMessage = ActionEffects.apply(
+                card,
+                new GameStateTurnEffectContext(state, () -> state.draw(random)));
         if (!quiet && !effectMessage.equals("")) {
             view.showEffectMessage(effectMessage);
         }

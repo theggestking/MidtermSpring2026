@@ -1,63 +1,58 @@
-import java.util.function.Supplier;
-
 enum CardRank {
     NUMBER {
-        String applyEffect(GameState state, Supplier<Card> drawCard) {
-            state.nextPlayer();
+        String applyEffect(TurnEffectContext context) {
+            context.nextPlayer();
             return "";
         }
     },
 
     SKIP {
-        String applyEffect(GameState state, Supplier<Card> drawCard) {
-            state.nextPlayer();
-            state.nextPlayer();
+        String applyEffect(TurnEffectContext context) {
+            context.nextPlayer();
+            context.nextPlayer();
             return "";
         }
     },
 
     REVERSE {
-        String applyEffect(GameState state, Supplier<Card> drawCard) {
-            state.setDirection(state.direction() * -1);
-            if (state.playerCount() == 2) {
-                state.nextPlayer();
-                state.nextPlayer();
+        String applyEffect(TurnEffectContext context) {
+            context.reverseDirection();
+            if (context.playerCount() == 2) {
+                context.nextPlayer();
+                context.nextPlayer();
             } else {
-                state.nextPlayer();
+                context.nextPlayer();
             }
             return "";
         }
     },
 
     DRAW_TWO {
-        String applyEffect(GameState state, Supplier<Card> drawCard) {
-            state.nextPlayer();
-            state.addCardToCurrentPlayer(drawCard.get());
-            state.addCardToCurrentPlayer(drawCard.get());
-            String message = state.currentPlayerName() + " draws two.";
-            state.nextPlayer();
+        String applyEffect(TurnEffectContext context) {
+            context.nextPlayer();
+            context.drawCardsForCurrentPlayer(2);
+            String message = context.currentPlayerName() + " draws two.";
+            context.nextPlayer();
             return message;
         }
     },
 
     WILD {
-        String applyEffect(GameState state, Supplier<Card> drawCard) {
-            state.nextPlayer();
+        String applyEffect(TurnEffectContext context) {
+            context.nextPlayer();
             return "";
         }
     },
 
     WILD_DRAW_FOUR {
-        String applyEffect(GameState state, Supplier<Card> drawCard) {
-            state.nextPlayer();
-            for (int i = 0; i < 4; i++) {
-                state.addCardToCurrentPlayer(drawCard.get());
-            }
-            String message = state.currentPlayerName() + " draws four.";
-            state.nextPlayer();
+        String applyEffect(TurnEffectContext context) {
+            context.nextPlayer();
+            context.drawCardsForCurrentPlayer(4);
+            String message = context.currentPlayerName() + " draws four.";
+            context.nextPlayer();
             return message;
         }
     };
 
-    abstract String applyEffect(GameState state, Supplier<Card> drawCard);
+    abstract String applyEffect(TurnEffectContext context);
 }
