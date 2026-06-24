@@ -82,7 +82,7 @@ Persistence tests use a unique H2 in-memory database per test. They verify:
 - tied, unknown, and case-insensitive win counts
 - highest-score ordering and limits
 - report argument parsing and rendering
-- the seeded `138`, `246`, `98` five-round session and `Bot2` winner
+- the seeded final-project `123`, `237`, `0` five-round session and `Bot2` winner
 
 ## Reports
 

@@ -1,9 +1,9 @@
 # UNO CLI
 
-This command-line UNO-like game uses Maven, Java 21, structured logging, an
-executable JAR, Docker, and persistent game history. Flyway owns the schema,
-Hibernate ORM maps it through Jakarta Persistence, and H2 supplies the local
-file database.
+This command-line UNO game uses Maven, Java 21, structured logging, an
+executable JAR, Docker, persistent game history, and a fuller final-project UNO
+ruleset. Flyway owns the schema, Hibernate ORM maps it through Jakarta
+Persistence, and H2 supplies the local file database.
 
 One CLI gameplay invocation is stored as one game session. Each `--games`
 iteration is stored as a round within that session.
@@ -32,9 +32,10 @@ Run all tests:
 mvn test
 ```
 
-The Maven suite runs the 53 preserved characterization assertions, logging
-tests, isolated Flyway/Hibernate tests, repository transaction tests, seeded
-persistence tests, and report tests.
+The Maven suite runs the 53 preserved characterization assertions plus focused
+tests for final UNO rules, safety-limit regressions, UNO-call penalties,
+target-score sessions, logging, Flyway/Hibernate, repositories, persistence,
+and reports.
 
 Create the self-contained executable JAR:
 
@@ -59,6 +60,12 @@ Run the packaged JAR:
 java -jar target/uno-cli.jar --bots 3 --games 5 --quiet
 ```
 
+Run until a target score is reached:
+
+```powershell
+java -jar target/uno-cli.jar --bots 3 --target-score 100 --quiet
+```
+
 Run an interactive game:
 
 ```powershell
@@ -71,12 +78,14 @@ Supported gameplay arguments:
 | --- | --- |
 | `--bots N` | Add `N` bot players |
 | `--games N` | Play and persist `N` rounds |
+| `--target-score N` | Play rounds until a player reaches `N` points, up to 100 rounds |
 | `--human` | Add one human player |
 | `--quiet` | Hide turn-by-turn player output |
 | `--seed N` | Use a deterministic random seed |
 | `--help` | Print command usage |
 
 UNO needs a total of two to four players.
+`--target-score` is an alternative to `--games`; do not combine them.
 
 Card input examples:
 
@@ -89,6 +98,9 @@ W    wild
 W4   wild draw four
 draw draw a card
 ```
+
+When a player reaches one card, bots call UNO automatically. Human players are
+prompted to call UNO; declining the call immediately draws two penalty cards.
 
 ## Game History
 
@@ -163,6 +175,12 @@ Override the disposable default game:
 docker run --rm uno-cli --bots 3 --games 5 --quiet --seed 123
 ```
 
+Run target-score mode in Docker:
+
+```powershell
+docker run --rm uno-cli --bots 3 --target-score 100 --quiet --seed 123
+```
+
 Use a named volume when history must survive between containers:
 
 ```powershell
@@ -196,6 +214,8 @@ The Maven commands above are the primary cross-platform workflow.
 ## Project Documentation
 
 - `docs/database.md`: persistence design and operations
+- `docs/rules-supported.md`: final-project rule support matrix
+- `docs/final-report.md`: final-project report and rubric evidence
 - `docs/rules.html`: implemented game rules
 - `docs/refactoring-report.md`: midterm refactoring report
 - `docs/extension-readiness.md`: extension readiness analysis

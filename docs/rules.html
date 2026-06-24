@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Midterm UNO CLI Rules</title>
+  <title>Final UNO CLI Rules</title>
   <style>
     :root {
       --red: #c62828;
@@ -361,8 +361,8 @@
 </head>
 <body>
   <main>
-    <h1>Simplified UNO Rules</h1>
-    <p class="lead">This guide explains the exact game variant implemented by the CLI project. It assumes you have never played UNO before.</p>
+    <h1>Final UNO CLI Rules</h1>
+    <p class="lead">This guide explains the exact final-project game variant implemented by the CLI project. It assumes you have never played UNO before.</p>
 
     <div class="rule-box">
       <strong>Core idea:</strong> on your turn, play one card that matches the card in the middle. The first player with no cards left wins.
@@ -482,6 +482,7 @@
         <li>Look at your hand. Cards are shown as <code>index:card</code>, such as <code>1:R9</code>.</li>
         <li>Play one legal card by typing its index or card code, or type <code>draw</code>.</li>
         <li>If you draw a card and it is playable, a human player may play it immediately. Bot players always play a drawn card automatically when it is legal.</li>
+        <li>If playing a card leaves you with one card, call UNO when prompted. Bots call UNO automatically.</li>
         <li>If you play an action card, its effect happens.</li>
         <li>The turn moves to the next player.</li>
       </ol>
@@ -535,7 +536,8 @@ Choose card index/code or draw:</code></pre>
 
     <section>
       <h2>Winning And Scoring</h2>
-      <p>The first player to play their last card wins the game. When a player has one card left, the game prints an UNO message automatically.</p>
+      <p>The first player to play their last card wins the round. When a player has one card left, bots call UNO automatically and human players are prompted to call UNO.</p>
+      <p>If a human player misses the UNO call, that player immediately draws two penalty cards and the round continues.</p>
 
       <table>
         <thead>
@@ -550,6 +552,7 @@ Choose card index/code or draw:</code></pre>
 
       <p>If the losing players still hold <code>R5</code>, <code>B9</code>, <code>GS</code>, and <code>W</code>, the winner scores:</p>
       <pre><code>5 + 9 + 20 + 50 = 84 points</code></pre>
+      <p>The CLI can play a fixed number of rounds with <code>--games</code> or continue until a target score with <code>--target-score</code>. Target-score mode stops at 100 rounds if the target is not reached.</p>
     </section>
 
     <section>
@@ -568,11 +571,9 @@ Choose card index/code or draw:</code></pre>
       <p>This is a simplified teaching version. It does not implement every official or house rule.</p>
       <ul>
         <li>challenging Wild Draw Four</li>
-        <li>penalty for failing to say UNO</li>
         <li>stacking draw cards</li>
         <li>jump-in</li>
         <li>7-0 rule</li>
-        <li>official target score, such as 500</li>
         <li>forcing a human player to play a card they just drew</li>
         <li>multiple human players in one game</li>
         <li>saved match configuration</li>
